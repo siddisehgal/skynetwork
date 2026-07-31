@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { FlightMap as FlightMapView } from '../components/map/FlightMap';
 import { OperationalSummary } from '../components/map/OperationalSummary';
+import { MapFilters, applyMapFilters, defaultMapFilters } from '../components/map/MapFilters';
 import { hasFlightPosition } from '../components/map/flightPosition';
 import { useAirports } from '../hooks/useAirports';
 import { useLiveFlights } from '../hooks/useLiveFlights';
@@ -7,8 +9,11 @@ import { useLiveFlights } from '../hooks/useLiveFlights';
 export default function FlightMap() {
   const { flights, loading, error } = useLiveFlights();
   const { airports, error: airportError } = useAirports();
+  const [filters, setFilters] = useState(defaultMapFilters);
+
   const positionedFlights = flights.filter(hasFlightPosition);
-  const hasMapData = positionedFlights.length > 0 || airports.length > 0;
+  const filteredFlights = applyMapFilters(positionedFlights, filters);
+  const hasMapData = filteredFlights.length > 0 || airports.length > 0;
 
   return (
     <main style={{ padding: 'var(--margin-desktop)', maxWidth: 'var(--container-max)', margin: '0 auto' }}>
@@ -16,7 +21,9 @@ export default function FlightMap() {
         Flight Map
       </h1>
       <p className="label-caps" style={{ color: 'var(--on-surface-variant)', marginBottom: 24 }}>
-        {loading ? 'Loading live positions…' : `${positionedFlights.length} live positions`}
+        {loading
+          ? 'Loading live positions…'
+          : `${filteredFlights.length} of ${positionedFlights.length} live positions shown`}
       </p>
 
       {error && (
@@ -41,10 +48,13 @@ export default function FlightMap() {
           No live aircraft or airport positions are available right now. Please try again shortly.
         </div>
       )}
+      {!loading && positionedFlights.length > 0 && (
+        <MapFilters flights={positionedFlights} filters={filters} onChange={setFilters} />
+      )}
       {hasMapData && (
         <>
-          <OperationalSummary flights={positionedFlights} />
-          <FlightMapView flights={positionedFlights} airports={airports} />
+          <OperationalSummary flights={filteredFlights} />
+          <FlightMapView flights={filteredFlights} airports={airports} showRoutes={filters.showRoutes} />
         </>
       )}
     </main>

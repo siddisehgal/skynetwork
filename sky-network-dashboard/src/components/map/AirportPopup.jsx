@@ -7,7 +7,6 @@ export function AirportPopup({ airport }) {
     <div className="airport-popup">
       <strong>{airport.name}</strong>
       <dl>
-        <div><dt>ICAO</dt><dd>{airport.icao}</dd></div>
         <div><dt>IATA</dt><dd>{airport.iata}</dd></div>
         <div><dt>Country</dt><dd>{airport.country}</dd></div>
         <div><dt>Latitude</dt><dd>{formatCoordinate(airport.latitude)}</dd></div>

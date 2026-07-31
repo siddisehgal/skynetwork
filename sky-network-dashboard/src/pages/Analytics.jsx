@@ -4,6 +4,7 @@ import { StatsCard } from '../components/StatsCard';
 import { DashboardCard } from '../components/DashboardCard';
 import { LiveFlightMap } from '../components/LiveFlightMap';
 import { FlightList } from "../components/FlightList";
+import { BarChart } from '../components/charts/BarChart';
 
 // Labeled temporary development mock data to help check dashboard UI/UX when API is offline
 const DEV_MOCK_STATS = {
@@ -261,7 +262,12 @@ export default function Analytics() {
             {/* Airline shares panel */}
             <DashboardCard title="Active carrier throughput share">
               {stats?.carrierShare && stats.carrierShare.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <>
+                  <BarChart
+                    data={stats.carrierShare.map((c) => ({ label: c.code, value: c.count, color: 'var(--surface-tint)' }))}
+                    height={140}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
                   {stats.carrierShare.map((c) => (
                     <div key={c.code} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottom: '1px solid var(--outline-variant)' }}>
                       <div>
@@ -273,7 +279,8 @@ export default function Analytics() {
                       </span>
                     </div>
                   ))}
-                </div>
+                  </div>
+                </>
               ) : (
                 <p style={{ fontSize: 12, color: 'var(--on-surface-variant)', textAlign: 'center', margin: '20px 0' }}>
                   No airline breakdown statistics available from current endpoint.
@@ -410,12 +417,17 @@ export default function Analytics() {
 
   {stats?.sectorLoad &&
   stats.sectorLoad.length > 0 ? (
-
+    <>
+    <BarChart
+      data={stats.sectorLoad.map((s) => ({ label: s.country, value: s.count, color: s.color }))}
+      height={140}
+    />
     <div
       style={{
         display:'flex',
         flexDirection:'column',
-        gap:12
+        gap:12,
+        marginTop: 16
       }}
     >
 
@@ -480,6 +492,7 @@ export default function Analytics() {
       ))}
 
     </div>
+    </>
 
   ) : (
 

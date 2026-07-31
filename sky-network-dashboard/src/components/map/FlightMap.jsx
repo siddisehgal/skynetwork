@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { AirportLayer } from './AirportLayer';
 import { FlightLayer } from './FlightLayer';
+import { RouteLayer } from './RouteLayer';
 import { hasFlightPosition } from './flightPosition';
 import { InitialViewport } from './InitialViewport';
 import { MapLegend } from './MapLegend';
@@ -8,7 +9,7 @@ import './flightMap.css';
 
 const worldCenter = [20, 0];
 
-export function FlightMap({ flights, airports = [] }) {
+export function FlightMap({ flights, airports = [], showRoutes = true }) {
   const positionedFlights = flights.filter(hasFlightPosition);
 
   return (
@@ -19,6 +20,7 @@ export function FlightMap({ flights, airports = [] }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <InitialViewport flights={positionedFlights} />
+        {showRoutes && <RouteLayer flights={positionedFlights} airports={airports} />}
         <FlightLayer flights={positionedFlights} />
         <AirportLayer airports={airports} />
       </MapContainer>

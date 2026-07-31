@@ -6,6 +6,6 @@ function hasAirportPosition(airport) {
 
 export function AirportLayer({ airports }) {
   return airports.filter(hasAirportPosition).map((airport) => (
-    <AirportMarker key={airport.icao} airport={airport} />
+    <AirportMarker key={airport.iata} airport={airport} />
   ));
 }
