@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlightMap as FlightMapView } from '../components/map/FlightMap';
 import { OperationalSummary } from '../components/map/OperationalSummary';
 import { MapFilters, applyMapFilters, defaultMapFilters } from '../components/map/MapFilters';
@@ -8,12 +8,43 @@ import { useLiveFlights } from '../hooks/useLiveFlights';
 
 export default function FlightMap() {
   const { flights, loading, error } = useLiveFlights();
-  const { airports, error: airportError } = useAirports();
-  const [filters, setFilters] = useState(defaultMapFilters);
+const { airports, error: airportError } = useAirports();
+const [filters, setFilters] = useState(defaultMapFilters);
+
+const [mroFacilities, setMroFacilities] = useState([]);
+const [mroLoading, setMroLoading] = useState(true);
+
+useEffect(() => {
+  const API_URL =
+    import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  fetch(`${API_URL}/api/mro`)
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch MRO facilities');
+      }
+      return res.json();
+    })
+    .then((data) => {
+      
+
+      setMroFacilities(Array.isArray(data) ? data : []);
+    })
+    .catch((err) => {
+      console.error('MRO map fetch error:', err);
+      setMroFacilities([]);
+    })
+    .finally(() => {
+      setMroLoading(false);
+    });
+}, []);
 
   const positionedFlights = flights.filter(hasFlightPosition);
   const filteredFlights = applyMapFilters(positionedFlights, filters);
-  const hasMapData = filteredFlights.length > 0 || airports.length > 0;
+  const hasMapData =
+  filteredFlights.length > 0 ||
+  airports.length > 0 ||
+  mroFacilities.length > 0;
 
   return (
     <main style={{ padding: 'var(--margin-desktop)', maxWidth: 'var(--container-max)', margin: '0 auto' }}>
@@ -54,7 +85,12 @@ export default function FlightMap() {
       {hasMapData && (
         <>
           <OperationalSummary flights={filteredFlights} />
-          <FlightMapView flights={filteredFlights} airports={airports} showRoutes={filters.showRoutes} />
+          <FlightMapView
+  flights={filteredFlights}
+  airports={airports}
+  mroFacilities={mroFacilities}
+  showRoutes={filters.showRoutes}
+/>
         </>
       )}
     </main>

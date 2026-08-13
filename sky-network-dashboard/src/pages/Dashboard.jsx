@@ -42,56 +42,188 @@ function FlightGridSkeleton() {
 }
 
 // MRO Facilities Integration Placeholder Structure (User Adjustment #1)
-function MroFacilitiesPlaceholder() {
+function MroFacilitiesStatus() {
+  const [facilities, setFacilities] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
+
+  React.useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    fetch(`${API_URL}/api/mro`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch MRO facilities');
+        return res.json();
+      })
+      .then((data) => {
+        setFacilities(Array.isArray(data) ? data : []);
+        setError(false);
+      })
+      .catch((err) => {
+        console.error('MRO fetch error:', err);
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
-      <h3 className="font-display" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--on-surface-variant)', borderTop: '1px solid var(--outline-variant)', paddingTop: 16, margin: 0, letterSpacing: '0.05em' }}>
+      <h3
+        className="font-display"
+        style={{
+          fontSize: 12,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          color: 'var(--on-surface-variant)',
+          borderTop: '1px solid var(--outline-variant)',
+          paddingTop: 16,
+          margin: 0,
+          letterSpacing: '0.05em'
+        }}
+      >
         MRO Facilities Status
       </h3>
-      <div style={{ border: '1px dashed var(--outline-variant)', borderRadius: 'var(--radius-md)', padding: 16, background: 'var(--surface-container-lowest)', textAlign: 'center' }}>
-        <span style={{ fontSize: 20, display: 'block', marginBottom: 6 }}>🛠️</span>
-        <span className="label-caps" style={{ fontSize: 10, color: 'var(--outline)', display: 'block', marginBottom: 4 }}>
-          MRO Schema Pending
-        </span>
-        <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', margin: 0, lineHeight: '1.4' }}>
-          Maintenance, Repair & Operations status grids will bind automatically once the backend telemetry schemas stabilize.
-        </p>
-      </div>
+
+      {loading ? (
+        <div
+          style={{
+            padding: 16,
+            textAlign: 'center',
+            color: 'var(--on-surface-variant)',
+            fontSize: 11
+          }}
+        >
+          Loading MRO facilities...
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            padding: 16,
+            textAlign: 'center',
+            color: 'var(--error)',
+            fontSize: 11
+          }}
+        >
+          Unable to load MRO facilities.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {facilities.slice(0, 5).map((facility) => (
+            <div
+              key={facility.id}
+              style={{
+                border: '1px solid var(--outline-variant)',
+                borderRadius: 'var(--radius-md)',
+                padding: 12,
+                background: 'var(--surface-container-lowest)'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                <strong
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--on-surface)'
+                  }}
+                >
+                  {facility.name}
+                </strong>
+
+                <span
+                  style={{
+                    fontSize: 9,
+                    color: 'var(--secondary-fixed-dim)'
+                  }}
+                >
+                  ONLINE
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 10,
+                  color: 'var(--on-surface-variant)',
+                  marginTop: 5
+                }}
+              >
+                {facility.city}, {facility.country}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: 8,
+                  fontSize: 9,
+                  color: 'var(--on-surface-variant)'
+                }}
+              >
+                <span>Hangars: {facility.hangars}</span>
+                <span>Capacity: {facility.annual_capacity}/yr</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
 export default function Dashboard() {
-  const { flights, loading, error } = useLiveFlights();
+  const { flights, lastSync, loading, error } = useLiveFlights();
 
-  // Compute metrics from flight list
   const totalCount = flights.length;
-  const delayedCount = flights.filter(f => String(f.status).toUpperCase().includes('DELAY')).length;
-  const uniqueCarriers = new Set(flights.map(f => f.airlineCode).filter(c => c && c !== '---')).size;
-  const uniqueCountries = new Set(flights.map(f => f.country).filter(c => c && c !== '---')).size;
+  const delayedCount = flights.filter(
+    f => String(f.status).toUpperCase().includes('DELAY')
+  ).length;
 
-  // Compute last updated time
-  const timestamps = flights.map(f => f.lastUpdated ? new Date(f.lastUpdated).getTime() : 0).filter(t => t && Number.isFinite(t));
-  const maxTimestamp = timestamps.reduce((max, t) => t > max ? t : max, 0);
-  const lastUpdatedString = maxTimestamp > 0
-    ? new Date(maxTimestamp).toLocaleTimeString()
-    : 'Pending update';
+  const uniqueCarriers = new Set(
+    flights.map(f => f.airlineCode).filter(c => c && c !== '---')
+  ).size;
+
+  const uniqueCountries = new Set(
+    flights.map(f => f.country).filter(c => c && c !== '---')
+  ).size;
+
+  const lastUpdatedString = lastSync
+  ? new Date(lastSync).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    })
+  : 'Pending update';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gutter)' }}>
-      {/* Top Header Label */}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 className="font-display glow-cyan" style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>
+          <h1
+            className="font-display glow-cyan"
+            style={{ fontSize: 24, fontWeight: 700, margin: 0 }}
+          >
             LIVE OPERATION CENTER
           </h1>
-          <p className="label-caps" style={{ color: 'var(--on-surface-variant)', marginTop: 4 }}>
+
+          <p
+            className="label-caps"
+            style={{ color: 'var(--on-surface-variant)', marginTop: 4 }}
+          >
             System radar tracking telemetry
           </p>
         </div>
       </div>
 
-      {/* Metrics Row */}
       {loading && flights.length === 0 ? (
         <StatsSkeleton />
       ) : (
@@ -102,18 +234,21 @@ export default function Dashboard() {
             subtext="Tracked network nodes"
             variant="primary"
           />
+
           <StatsCard
             label="Operational Alerts"
             value={delayedCount}
             subtext="Flights flagged as delayed"
             variant={delayedCount > 0 ? 'tertiary' : 'secondary'}
           />
+
           <StatsCard
             label="Monitored Carriers"
             value={uniqueCarriers || '---'}
             subtext="Unique airline operators"
             variant="secondary"
           />
+
           <StatsCard
             label="Covered Sectors"
             value={uniqueCountries || '---'}
@@ -123,24 +258,54 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Main Panel Layout Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--gutter)', alignItems: 'start' }}>
-        
-        {/* Left Column: Live Radar Trajectories */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: 'var(--gutter)',
+          alignItems: 'start'
+        }}
+      >
+
         <DashboardCard
           title="Live Trajectory Monitor"
           icon={
-            <span style={{ marginRight: 6, display: 'inline-block', width: 8, height: 8, background: 'var(--surface-tint)', borderRadius: '50%' }} />
+            <span
+              style={{
+                marginRight: 6,
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                background: 'var(--surface-tint)',
+                borderRadius: '50%'
+              }}
+            />
           }
           headerActions={
-            <span className="label-caps" style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>
+            <span
+              className="label-caps"
+              style={{
+                fontSize: 10,
+                color: 'var(--on-surface-variant)'
+              }}
+            >
               {loading ? 'Refreshing...' : 'Live Stream'}
             </span>
           }
         >
           {error && (
-            <div style={{ background: 'var(--error-container)', color: 'var(--on-error-container)', padding: 16, borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 13, border: '1px solid var(--error)' }}>
-              <strong>SYSTEM FAULT:</strong> Couldn&apos;t reach API server. Check that the backend is active at {import.meta.env.VITE_API_URL || 'http://localhost:5000'}.
+            <div
+              style={{
+                background: 'var(--error-container)',
+                color: 'var(--on-error-container)',
+                padding: 16,
+                borderRadius: 'var(--radius-md)',
+                marginBottom: 16,
+                fontSize: 13,
+                border: '1px solid var(--error)'
+              }}
+            >
+              <strong>SYSTEM FAULT:</strong> Couldn't reach API server.
             </div>
           )}
 
@@ -149,11 +314,21 @@ export default function Dashboard() {
           ) : flights.length === 0 ? (
             <div className="hud-empty-state">
               <span className="hud-empty-icon">📡</span>
-              <h3 style={{ margin: 0, color: 'var(--on-surface)' }}>NO ACTIVE TRAJECTORIES</h3>
-              <p style={{ margin: 0, fontSize: 12 }}>Check backend services configuration. No flights currently tracked in sector.</p>
+              <h3 style={{ margin: 0, color: 'var(--on-surface)' }}>
+                NO ACTIVE TRAJECTORIES
+              </h3>
+              <p style={{ margin: 0, fontSize: 12 }}>
+                Check backend services configuration. No flights currently tracked in sector.
+              </p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--gutter)' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: 'var(--gutter)'
+              }}
+            >
               {flights.map((flight) => (
                 <FlightCard key={flight.id} flight={flight} />
               ))}
@@ -161,36 +336,73 @@ export default function Dashboard() {
           )}
         </DashboardCard>
 
-        {/* Right Column: Connection and MRO status panels (User Adjustment #2) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gutter)' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--gutter)'
+          }}
+        >
           <DashboardCard title="Data Connection status">
+
             <div className="hud-connection-panel">
+
               <div className="hud-connection-row">
-                <span className="hud-connection-label">API Status</span>
-                <span className="hud-connection-value" style={{ color: error ? 'var(--error)' : 'var(--secondary-fixed-dim)' }}>
+                <span className="hud-connection-label">
+                  API Status
+                </span>
+
+                <span
+                  className="hud-connection-value"
+                  style={{
+                    color: error
+                      ? 'var(--error)'
+                      : 'var(--secondary-fixed-dim)'
+                  }}
+                >
                   {error ? 'FAULT / OFFLINE' : 'ACTIVE / ONLINE'}
                 </span>
               </div>
+
               <div className="hud-connection-row">
-                <span className="hud-connection-label">Data Source</span>
+                <span className="hud-connection-label">
+                  Data Source
+                </span>
+
                 <span className="hud-connection-value">
                   OpenSky / Sandbox fallback
                 </span>
               </div>
+
               <div className="hud-connection-row">
-                <span className="hud-connection-label">Last telemetry sync</span>
-                <span className="hud-connection-value">{lastUpdatedString}</span>
+                <span className="hud-connection-label">
+                  Last telemetry sync
+                </span>
+
+                <span className="hud-connection-value">
+                  {lastUpdatedString}
+                </span>
               </div>
+
               <div className="hud-connection-row">
-                <span className="hud-connection-label">Connection link</span>
-                <span className="hud-connection-value" style={{ color: 'var(--secondary-fixed-dim)' }}>
+                <span className="hud-connection-label">
+                  Connection link
+                </span>
+
+                <span
+                  className="hud-connection-value"
+                  style={{
+                    color: 'var(--secondary-fixed-dim)'
+                  }}
+                >
                   {error ? 'DISCONNECTED' : 'SECURE REST'}
                 </span>
               </div>
+
             </div>
 
-            {/* Render MRO facilities placeholder inside right panel structure */}
-            <MroFacilitiesPlaceholder />
+            <MroFacilitiesStatus />
+
           </DashboardCard>
         </div>
 

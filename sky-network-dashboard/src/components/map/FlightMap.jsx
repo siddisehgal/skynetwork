@@ -1,3 +1,4 @@
+import { MROLayer } from './MROLayer';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { AirportLayer } from './AirportLayer';
 import { FlightLayer } from './FlightLayer';
@@ -9,8 +10,12 @@ import './flightMap.css';
 
 const worldCenter = [20, 0];
 
-export function FlightMap({ flights, airports = [], showRoutes = true }) {
-  const positionedFlights = flights.filter(hasFlightPosition);
+export function FlightMap({
+  flights,
+  airports = [],
+  mroFacilities = [],
+  showRoutes = true
+}) {  const positionedFlights = flights.filter(hasFlightPosition);
 
   return (
     <div className="flight-map-container">
@@ -23,6 +28,7 @@ export function FlightMap({ flights, airports = [], showRoutes = true }) {
         {showRoutes && <RouteLayer flights={positionedFlights} airports={airports} />}
         <FlightLayer flights={positionedFlights} />
         <AirportLayer airports={airports} />
+        <MROLayer facilities={mroFacilities} />
       </MapContainer>
       <MapLegend />
     </div>

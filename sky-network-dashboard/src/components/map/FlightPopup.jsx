@@ -5,7 +5,9 @@ export function FlightPopup({ flight }) {
 
   return (
     <div className="flight-popup">
-      <strong className="font-mono">{flight.callsign || flight.flightCode || 'Unknown callsign'}</strong>
+      <strong className="font-mono">
+  {flight.flightCode || flight.callsign || 'Unknown flight'}
+</strong>
       <dl>
         <div><dt>ICAO24</dt><dd>{icao24}</dd></div>
         <div><dt>Country</dt><dd>{flight.country || flight.originCountry || 'Unavailable'}</dd></div>

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { StatsCard } from '../components/StatsCard';
 import { DashboardCard } from '../components/DashboardCard';
-import { LiveFlightMap } from '../components/LiveFlightMap';
 import { FlightList } from "../components/FlightList";
 import { BarChart } from '../components/charts/BarChart';
+import { useLiveFlights } from '../hooks/useLiveFlights';
+import { FlightMap } from '../components/map/FlightMap';
 
 // Labeled temporary development mock data to help check dashboard UI/UX when API is offline
 const DEV_MOCK_STATS = {
@@ -58,16 +59,41 @@ function AnalyticsSkeleton() {
 
 export default function Analytics() {
   const { stats: apiStats, loading, error } = useAnalytics();
+  const { flights } = useLiveFlights();
   const [devMode, setDevMode] = useState(false);
 
   const stats = devMode ? DEV_MOCK_STATS : apiStats;
 
   // Safe checks for potentially missing/stabilizing API keys
-  const totalFlights = stats?.totalFlights ?? stats?.total_flights ?? stats?.activeFlights ?? null;
-  const alertRate = stats?.alertRate ?? stats?.delayedRate ?? (stats?.delayedFlights && stats?.totalFlights ? `${Math.round((stats.delayedFlights / stats.totalFlights) * 100)}%` : null);
-  const averageAltitude = stats?.averageAltitude ?? stats?.avgAltitude ?? null;
-  const averageSpeed = stats?.averageSpeed ?? stats?.avgSpeed ?? null;
-  const activeSectors = stats?.activeSectors ?? stats?.sectorsCount ?? null;
+const totalFlights =
+  stats?.totalFlights24h ??
+  stats?.totalFlights ??
+  stats?.total_flights ??
+  null;
+
+const alertRate =
+  stats?.alertRate ??
+  stats?.delayedRate ??
+  (stats?.delayedFlights != null && stats?.activeFlights
+    ? `${Math.round(
+        (stats.delayedFlights / stats.activeFlights) * 100
+      )}%`
+    : '0%');
+
+const averageAltitude =
+  stats?.averageAltitude ??
+  stats?.avgAltitude ??
+  null;
+
+const averageSpeed =
+  stats?.averageSpeed ??
+  stats?.avgSpeed ??
+  null;
+
+const activeSectors =
+  stats?.activeSectors ??
+  stats?.sectorsCount ??
+  null;
 
   const hasData = totalFlights != null || activeSectors != null;
 
@@ -156,11 +182,11 @@ export default function Analytics() {
           <div className="hud-stats-grid">
 
   <StatsCard
-    label="Total Nodes Analyzed"
-    value={totalFlights ?? '---'}
-    subtext="Total cumulative logs"
-    variant="primary"
-  />
+  label="FLIGHTS — 24H"
+  value={totalFlights ?? '---'}
+  subtext="Total flights tracked"
+  variant="primary"
+/>
 
 
   <StatsCard
@@ -176,28 +202,27 @@ export default function Analytics() {
 
 
   <StatsCard
-    label="Sector Altitudes"
-    value={
-      averageAltitude
-        ? `${Math.round(averageAltitude).toLocaleString()} ft`
-        : '---'
-    }
-    subtext="Mean cruising altitude"
-    variant="primary"
-  />
+  label="Sector Altitudes"
+  value={
+    averageAltitude != null
+      ? `${Math.round(averageAltitude).toLocaleString()} ft`
+      : '---'
+  }
+  subtext="Mean cruising altitude"
+  variant="primary"
+/>
 
 
   <StatsCard
-    label="Mean Ground Speed"
-    value={
-      averageSpeed
-        ? `${Math.round(averageSpeed)} kt`
-        : '---'
-    }
-    subtext="Mean node velocity"
-    variant="secondary"
-  />
-
+  label="Mean Ground Speed"
+  value={
+    averageSpeed != null
+      ? `${Math.round(averageSpeed)} kt`
+      : '---'
+  }
+  subtext="Mean node velocity"
+  variant="secondary"
+/>
 
   <StatsCard
     label="Network Health"
@@ -229,9 +254,9 @@ export default function Analytics() {
     }}
   >
     {/* Live Map */}
-    <LiveFlightMap
-      flights={stats?.flights || []}
-    />
+    <FlightMap
+    flights={flights}
+/>
 
     {/* Flight List */}
     <div
@@ -243,21 +268,14 @@ export default function Analytics() {
       }}
     >
       <FlightList
-        flights={stats?.flights || []}
-      />
+    flights={flights}
+/>
     </div>
   </div>
 </DashboardCard>
 
 {/* Detailed breakdowns */}
-<div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: 'var(--gutter)',
-  }}
-></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--gutter)' }}>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--gutter)' }}>
             
             {/* Airline shares panel */}
             <DashboardCard title="Active carrier throughput share">

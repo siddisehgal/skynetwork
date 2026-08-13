@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SKYCOMMAND - Global Flight Operations</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=JetBrains+Mono:wght@400..800&amp;family=Inter:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(16, 19, 26, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(219, 252, 255, 0.1);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 219, 233, 0.3);
+        }
+        .glow-text-cyan {
+            text-shadow: 0 0 8px rgba(0, 219, 233, 0.5);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#3b494b",
+                        "on-secondary-container": "#0f6d00",
+                        "primary-container": "#00f0ff",
+                        "primary": "#dbfcff",
+                        "on-error": "#690005",
+                        "on-primary": "#00363a",
+                        "tertiary-fixed-dim": "#ffba20",
+                        "surface-container": "#1d2026",
+                        "on-primary-container": "#006970",
+                        "tertiary-fixed": "#ffdea8",
+                        "surface-bright": "#363940",
+                        "on-background": "#e1e2eb",
+                        "tertiary-container": "#ffd386",
+                        "error-container": "#93000a",
+                        "surface-container-lowest": "#0b0e14",
+                        "surface": "#10131a",
+                        "surface-container-highest": "#32353c",
+                        "error": "#ffb4ab",
+                        "tertiary": "#fff4e8",
+                        "inverse-on-surface": "#2e3037",
+                        "on-secondary-fixed-variant": "#095300",
+                        "surface-container-high": "#272a31",
+                        "on-primary-fixed-variant": "#004f54",
+                        "surface-tint": "#00dbe9",
+                        "on-tertiary-container": "#7d5800",
+                        "background": "#10131a",
+                        "surface-container-low": "#191c22",
+                        "secondary-container": "#2ff801",
+                        "secondary": "#d7ffc5",
+                        "primary-fixed": "#7df4ff",
+                        "on-tertiary": "#412d00",
+                        "on-secondary-fixed": "#022100",
+                        "on-surface-variant": "#b9cacb",
+                        "surface-variant": "#32353c",
+                        "surface-dim": "#10131a",
+                        "on-tertiary-fixed-variant": "#5e4200",
+                        "on-primary-fixed": "#002022",
+                        "secondary-fixed-dim": "#2ae500",
+                        "secondary-fixed": "#79ff5b",
+                        "primary-fixed-dim": "#00dbe9",
+                        "on-tertiary-fixed": "#271900",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#e1e2eb",
+                        "on-secondary": "#053900",
+                        "outline": "#849495",
+                        "inverse-surface": "#e1e2eb",
+                        "inverse-primary": "#006970"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "24px",
+                        "container-max": "1800px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Space Grotesk"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["Space Grotesk"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "data-mono": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 h-16 z-50 flex justify-between items-center px-margin-desktop bg-surface/60 dark:bg-surface/60 backdrop-blur-md border-b border-primary/10 shadow-sm">
+<div class="flex items-center gap-8">
+<span class="font-display-lg text-headline-md tracking-tighter text-primary dark:text-primary-fixed-dim">SKYCOMMAND</span>
+<div class="hidden md:flex items-center gap-6">
+<nav class="flex gap-4">
+<a class="font-label-caps text-label-caps text-primary dark:text-primary-fixed border-b-2 border-primary pb-1" href="#">DASHBOARD</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-all duration-300" href="#">ANALYTICS</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-all duration-300" href="#">SYSTEMS</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group hidden sm:block">
+<input class="bg-surface-container-highest/30 border border-outline-variant/30 rounded-none px-4 py-1.5 w-64 font-data-mono text-data-mono focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all" placeholder="SEARCH FLIGHT OR SECTOR..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1.5 text-on-surface-variant" data-icon="travel_explore">travel_explore</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded active:scale-95">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+<button class="p-2 hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded active:scale-95 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary-container rounded-full shadow-[0_0_5px_rgba(47,248,1,0.5)]"></span>
+</button>
+<button class="p-2 hover:bg-primary/5 hover:text-primary transition-all duration-300 rounded active:scale-95">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40 hidden md:flex flex-col bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-lg border-r border-primary/10">
+<div class="p-6 border-b border-primary/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container/20 border border-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="dashboard_customize">dashboard_customize</span>
+</div>
+<div>
+<h2 class="font-headline-md text-primary leading-none">SECTOR 01</h2>
+<p class="font-data-mono text-[10px] text-secondary tracking-widest mt-1">OPERATIONAL</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 py-4">
+<a class="bg-primary-container/20 text-primary border-l-4 border-primary px-4 py-3 flex items-center gap-3 translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+<span class="font-label-caps text-label-caps">DASHBOARD</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/30 px-4 py-3 flex items-center gap-3 transition-colors hover:shadow-[0_0_8px_rgba(0,219,233,0.3)]" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-label-caps text-label-caps">ANALYTICS</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/30 px-4 py-3 flex items-center gap-3 transition-colors hover:shadow-[0_0_8px_rgba(0,219,233,0.3)]" href="#">
+<span class="material-symbols-outlined" data-icon="settings_suggest">settings_suggest</span>
+<span class="font-label-caps text-label-caps">MRO FACILITIES</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/30 px-4 py-3 flex items-center gap-3 transition-colors hover:shadow-[0_0_8px_rgba(0,219,233,0.3)]" href="#">
+<span class="material-symbols-outlined" data-icon="travel_explore">travel_explore</span>
+<span class="font-label-caps text-label-caps">GLOBAL SEARCH</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-primary/5 border border-primary/20 p-4">
+<p class="font-data-mono text-[10px] text-primary/60 mb-2">NETWORK LATENCY</p>
+<div class="flex items-center gap-2">
+<div class="h-1 flex-1 bg-surface-container-highest">
+<div class="h-full bg-secondary-container w-[15%]"></div>
+</div>
+<span class="font-data-mono text-[10px] text-secondary">12MS</span>
+</div>
+</div>
+<div class="mt-4 p-3 border border-outline-variant/30 text-center">
+<span class="font-label-caps text-label-caps text-secondary tracking-tighter">SYSTEM STATUS: OPTIMAL</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-16 min-h-screen bg-surface-container-lowest overflow-hidden relative">
+<!-- 3D Globe Background Overlay (Visual Representation) -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-40">
+<img class="w-full h-full object-cover grayscale brightness-50" data-alt="A cinematic, high-resolution rendering of a digital earth globe viewed from space, with glowing cyan and neon green data lines connecting major global hubs. The aesthetic is dark and futuristic, with a focus on high-contrast data visualization and glowing orbital trajectories. The lighting is low-key, emphasizing the luminous cyan arcs of simulated global flight paths against the deep black of the void." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCirEvbeXRCvd1H2lCAUZ85K-yGJO5t0plvwkYxe-OrxbfdIfzRoABCGXKuvWjmdLPJfzQ4Ii7gSobWXIFJgfWxee-flPdGvgztbqgG1PvbFsUq7C-xs8bklWRfLz0UQ8pOnw_vlqViTHX73kyFbTH45xlMYhMcUkeoCBbmvHcTXKKrm5gJ3a930bk-MCmvqL2nnSzDVkso--Xm3H4dPvsUX9MAhy20YTKwgrulsP7GM-WQ0W98pca2zXMl4c9GFHGhZRP0N9w100"/>
+</div>
+<div class="relative z-10 grid grid-cols-12 gap-gutter p-6 h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Panel: Flight List -->
+<section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-hidden">
+<div class="glass-panel p-4 flex-1 flex flex-col overflow-hidden">
+<div class="flex items-center justify-between mb-4 border-b border-primary/10 pb-2">
+<h3 class="font-headline-md text-primary text-[18px]">ACTIVE TRACKS</h3>
+<span class="font-data-mono text-[12px] bg-primary/10 px-2 py-0.5 text-primary">LIVE: 1,284</span>
+</div>
+<div class="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-primary/20">
+<!-- Flight Item -->
+<div class="group p-3 border border-outline-variant/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono text-primary text-[16px] glow-text-cyan">SK-402</span>
+<span class="flex items-center gap-1 font-label-caps text-[10px] text-secondary">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full animate-pulse shadow-[0_0_5px_rgba(47,248,1,0.5)]"></span>
+                                    IN-FLIGHT
+                                </span>
+</div>
+<div class="flex justify-between text-[11px] font-data-mono text-on-surface-variant">
+<span>LHR <span class="text-primary/40">→</span> JFK</span>
+<span>34,000 FT</span>
+</div>
+<div class="mt-2 h-1 bg-surface-container-highest">
+<div class="h-full bg-primary-container w-[65%]"></div>
+</div>
+</div>
+<!-- Flight Item -->
+<div class="p-3 border border-outline-variant/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono text-primary text-[16px]">CG-991</span>
+<span class="flex items-center gap-1 font-label-caps text-[10px] text-tertiary-fixed-dim">
+<span class="w-1.5 h-1.5 bg-tertiary-fixed-dim rounded-full"></span>
+                                    DELAYED
+                                </span>
+</div>
+<div class="flex justify-between text-[11px] font-data-mono text-on-surface-variant">
+<span>HKG <span class="text-primary/40">→</span> DXB</span>
+<span>12,500 FT</span>
+</div>
+<div class="mt-2 h-1 bg-surface-container-highest">
+<div class="h-full bg-tertiary-fixed-dim w-[12%]"></div>
+</div>
+</div>
+<!-- Flight Item -->
+<div class="p-3 border border-outline-variant/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer border-l-4 border-l-primary bg-primary/5">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono text-primary text-[16px] glow-text-cyan">QA-117</span>
+<span class="flex items-center gap-1 font-label-caps text-[10px] text-secondary">
+<span class="w-1.5 h-1.5 bg-secondary-container rounded-full animate-pulse"></span>
+                                    ACTIVE
+                                </span>
+</div>
+<div class="flex justify-between text-[11px] font-data-mono text-on-surface-variant">
+<span>SIN <span class="text-primary/40">→</span> SYD</span>
+<span>38,000 FT</span>
+</div>
+<div class="mt-2 h-1 bg-surface-container-highest">
+<div class="h-full bg-primary-container w-[88%]"></div>
+</div>
+</div>
+<!-- More dummy items -->
+<div class="p-3 border border-outline-variant/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer opacity-70">
+<div class="flex justify-between items-start mb-2">
+<span class="font-data-mono text-primary text-[16px]">PV-084</span>
+<span class="flex items-center gap-1 font-label-caps text-[10px] text-outline">
+<span class="w-1.5 h-1.5 bg-outline rounded-full"></span>
+                                    PENDING
+                                </span>
+</div>
+<div class="flex justify-between text-[11px] font-data-mono text-on-surface-variant">
+<span>CDG <span class="text-primary/40">→</span> MUC</span>
+<span>0 FT</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Center Content: Globe and Stats Overlay -->
+<section class="col-span-12 lg:col-span-6 flex flex-col relative">
+<!-- Flight Path Map Controls -->
+<div class="absolute top-4 left-4 z-20 flex flex-col gap-2">
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="add">add</span>
+</button>
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="remove">remove</span>
+</button>
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="my_location">my_location</span>
+</button>
+</div>
+<!-- Central Legend & Visual Indicators -->
+<div class="absolute bottom-4 left-4 z-20 flex gap-4 glass-panel p-3 px-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-container rounded-full shadow-[0_0_5px_#00f0ff]"></span>
+<span class="font-label-caps text-label-caps text-on-surface/80">COMMERCIAL</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-secondary-container rounded-full shadow-[0_0_5px_#2ff801]"></span>
+<span class="font-label-caps text-label-caps text-on-surface/80">CARGO</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-tertiary-fixed-dim rounded-full shadow-[0_0_5px_#ffba20]"></span>
+<span class="font-label-caps text-label-caps text-on-surface/80">PRIVATE</span>
+</div>
+</div>
+<!-- Dynamic Data Visuals -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<div class="w-[80%] aspect-square border border-primary/5 rounded-full flex items-center justify-center">
+<div class="w-[60%] aspect-square border border-primary/10 rounded-full border-dashed animate-[spin_20s_linear_infinite]"></div>
+</div>
+</div>
+</section>
+<!-- Right Panel: Telemetry -->
+<section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-hidden">
+<div class="glass-panel p-5 flex flex-col gap-6 h-full">
+<div class="flex justify-between items-center border-b border-primary/10 pb-4">
+<div>
+<p class="font-data-mono text-[10px] text-primary/60 tracking-tighter">CURRENT TRACK</p>
+<h3 class="font-headline-md text-primary glow-text-cyan">QA-117</h3>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-[10px] text-primary/60">B787-9</p>
+<p class="font-label-caps text-[10px] text-on-surface-variant">QUANTUM AIRWAYS</p>
+</div>
+</div>
+<!-- Telemetry Stats -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-highest/20 p-3 border-l-2 border-primary">
+<p class="font-data-mono text-[10px] text-on-surface-variant">ALTITUDE</p>
+<p class="font-headline-md text-on-surface text-[20px]">38,000 <span class="text-[12px] opacity-50">FT</span></p>
+</div>
+<div class="bg-surface-container-highest/20 p-3 border-l-2 border-secondary">
+<p class="font-data-mono text-[10px] text-on-surface-variant">GROUND SPEED</p>
+<p class="font-headline-md text-on-surface text-[20px]">542 <span class="text-[12px] opacity-50">KTS</span></p>
+</div>
+<div class="bg-surface-container-highest/20 p-3 border-l-2 border-outline">
+<p class="font-data-mono text-[10px] text-on-surface-variant">HEADING</p>
+<p class="font-headline-md text-on-surface text-[20px]">142° <span class="text-[12px] opacity-50">SE</span></p>
+</div>
+<div class="bg-surface-container-highest/20 p-3 border-l-2 border-primary-container">
+<p class="font-data-mono text-[10px] text-on-surface-variant">FUEL LVL</p>
+<p class="font-headline-md text-on-surface text-[20px]">84%</p>
+</div>
+</div>
+<!-- Radar View Clip -->
+<div class="relative w-full aspect-square border border-primary/20 bg-black/40 overflow-hidden">
+<img class="w-full h-full object-cover opacity-30 mix-blend-screen" data-alt="A detailed, green and black phosphor radar display graphic showing circular range markers and multiple flight track IDs. The aesthetic is inspired by vintage air traffic control terminals but rendered with modern high-fidelity clarity. Small digital pips indicate aircraft positions, each with trailing history dots, all glowing with a soft neon emerald light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGyXlffWB1xAMO1uKX6jEuMgzn6brghLpsoLkhBsN5WNHzFYI61v7ecnWn5R1qSlIYXI1UPon7ZVgrI2mL_d2CT2wg0z95zS1R2KOx4wcCEoYDFwchLou0aSekyT8rRj7Mm4NLtIZbiHI4XJG3vxpbPeW4ZLHfoBLnKumZUest4eo-0V6ldlh_7YVtDG-EqlHYuuVA07ieawpO2okV6OItPWQPu-WBeGteTfWI0o62IYzP5A2UpTL39oi6rKLxN-MlyFoT-dIDPr4"/>
+<div class="absolute inset-0 border border-primary/20 flex items-center justify-center">
+<div class="w-[1px] h-full bg-primary/20 absolute left-1/2"></div>
+<div class="h-[1px] w-full bg-primary/20 absolute top-1/2"></div>
+<div class="w-12 h-12 border border-primary animate-ping absolute rounded-full"></div>
+</div>
+</div>
+<div class="mt-auto space-y-3">
+<button class="w-full bg-primary-container text-on-primary-container font-label-caps py-3 tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">
+                            ESTABLISH COMMS
+                        </button>
+<button class="w-full bg-transparent border border-primary/30 text-primary font-label-caps py-3 tracking-widest hover:bg-primary/10 transition-all">
+                            REDIRECT TRACK
+                        </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="absolute bottom-0 w-full py-4 px-margin-desktop glass-panel border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4 z-40">
+<span class="font-label-caps text-label-caps text-primary">© 2024 SKYCOMMAND AEROSPACE. HIGH-FIDELITY TRACKING ACTIVE.</span>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<a class="font-label-caps text-[11px] text-on-surface-variant/70 hover:text-on-surface transition-colors" href="#">ABOUT</a>
+<a class="font-label-caps text-[11px] text-on-surface-variant/70 hover:text-on-surface transition-colors" href="#">DATA SOURCES</a>
+<a class="font-label-caps text-[11px] text-on-surface-variant/70 hover:text-on-surface transition-colors" href="#">SUPPORT</a>
+<a class="font-label-caps text-[11px] text-on-surface-variant/70 hover:text-on-surface transition-colors" href="#">LEGAL</a>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant/40"></div>
+<div class="flex items-center gap-2 bg-surface-container-highest/40 rounded-full px-3 py-1 border border-outline-variant/20">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="wifi">wifi</span>
+<span class="font-data-mono text-[10px] text-secondary">LINK: STABLE</span>
+</div>
+</div>
+</footer>
+</main>
+</body></html>

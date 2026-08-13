@@ -109,3 +109,30 @@ body {
 .glow-cyan {
   text-shadow: 0 0 12px var(--surface-tint);
 }
+
+/* =========================================================
+   SKYNETWORK LIGHT THEME
+   ========================================================= */
+
+html[data-theme="light"] {
+  --surface: #f4f7f8;
+  --surface-container: #ffffff;
+  --surface-container-low: #eef2f3;
+  --surface-container-high: #e6ebed;
+
+  --on-surface: #172126;
+  --on-surface-variant: #526168;
+
+  --outline: #7b8a90;
+  --outline-variant: #cbd4d7;
+
+  --surface-tint: #00a8c6;
+
+  --secondary-fixed-dim: #19a900;
+
+  --primary: #008eaa;
+  --on-primary: #ffffff;
+
+  --background: #f4f7f8;
+  --on-background: #172126;
+}
