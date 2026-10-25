@@ -1,7 +1,10 @@
 import React from 'react';
 import { FlightCard } from '../components/FlightCard';
+import { AircraftMetadataAttribution } from '../components/AircraftMetadataAttribution';
 import { StatsCard } from '../components/StatsCard';
 import { DashboardCard } from '../components/DashboardCard';
+import { DataFreshness } from '../components/DataFreshness';
+import { Pagination } from '../components/Pagination';
 import { useLiveFlights } from '../hooks/useLiveFlights';
 
 
@@ -117,7 +120,8 @@ function MroFacilitiesStatus() {
                 border: '1px solid var(--outline-variant)',
                 borderRadius: 'var(--radius-md)',
                 padding: 12,
-                background: 'var(--surface-container-lowest)'
+                background: 'var(--surface-container-low)',
+                color: 'var(--on-surface)'
               }}
             >
               <div
@@ -177,23 +181,30 @@ function MroFacilitiesStatus() {
   );
 }
 export default function Dashboard() {
-  const { flights, lastSync, loading, error } = useLiveFlights();
+  const { flights, snapshotTimestamp, sourceTimestamp, freshness, source, loading, error, sourceError, sourceErrorCode } = useLiveFlights();
+  const [page, setPage] = React.useState(0);
+  const pageSize = 30;
+  const pageCount = Math.ceil(flights.length / pageSize);
+  const currentPage = Math.min(page, Math.max(0, pageCount - 1));
+  const visibleFlights = flights.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
   const totalCount = flights.length;
-  const delayedCount = flights.filter(
-    f => String(f.status).toUpperCase().includes('DELAY')
-  ).length;
+  const airborneCount = flights.filter((flight) => flight.status === 'IN-FLIGHT').length;
+  const groundCount = flights.filter((flight) => flight.status === 'ON-GROUND').length;
 
   const uniqueCarriers = new Set(
     flights.map(f => f.airlineCode).filter(c => c && c !== '---')
   ).size;
+  const unknownOperatorCount = flights.filter(
+    (flight) => !flight.airlineCode || flight.airlineCode === '---' || flight.operatorUnknown
+  ).length;
 
   const uniqueCountries = new Set(
     flights.map(f => f.country).filter(c => c && c !== '---')
   ).size;
 
-  const lastUpdatedString = lastSync
-  ? new Date(lastSync).toLocaleString('en-GB', {
+  const lastUpdatedString = sourceTimestamp
+  ? new Date(sourceTimestamp).toLocaleString('en-GB', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -221,6 +232,14 @@ export default function Dashboard() {
           >
             System radar tracking telemetry
           </p>
+          <DataFreshness
+            freshness={freshness}
+            source={source}
+            snapshotTimestamp={snapshotTimestamp}
+            sourceTimestamp={sourceTimestamp}
+            error={sourceError || error}
+            errorCode={sourceErrorCode}
+          />
         </div>
       </div>
 
@@ -236,21 +255,35 @@ export default function Dashboard() {
           />
 
           <StatsCard
-            label="Operational Alerts"
-            value={delayedCount}
-            subtext="Flights flagged as delayed"
-            variant={delayedCount > 0 ? 'tertiary' : 'secondary'}
-          />
-
-          <StatsCard
-            label="Monitored Carriers"
-            value={uniqueCarriers || '---'}
-            subtext="Unique airline operators"
+            label="Airborne"
+            value={airborneCount}
+            subtext="Reported in flight"
             variant="secondary"
           />
 
           <StatsCard
-            label="Covered Sectors"
+            label="On Ground"
+            value={groundCount}
+            subtext="Reported on ground"
+            variant="tertiary"
+          />
+
+          <StatsCard
+            label="Known Carriers"
+            value={uniqueCarriers || '---'}
+            subtext="Distinct ICAO operator codes"
+            variant="secondary"
+          />
+
+          <StatsCard
+            label="Unknown Operators"
+            value={unknownOperatorCount}
+            subtext="No exact ICAO prefix match"
+            variant="tertiary"
+          />
+
+          <StatsCard
+            label="Countries Represented"
             value={uniqueCountries || '---'}
             subtext="Country boundaries crossed"
             variant="primary"
@@ -289,7 +322,7 @@ export default function Dashboard() {
                 color: 'var(--on-surface-variant)'
               }}
             >
-              {loading ? 'Refreshing...' : 'Live Stream'}
+              {loading ? 'Refreshing...' : `${totalCount} records`}
             </span>
           }
         >
@@ -329,11 +362,15 @@ export default function Dashboard() {
                 gap: 'var(--gutter)'
               }}
             >
-              {flights.map((flight) => (
+              {visibleFlights.map((flight) => (
                 <FlightCard key={flight.id} flight={flight} />
               ))}
             </div>
           )}
+          {!loading && flights.length > 0 && (
+            <Pagination page={currentPage} pageSize={pageSize} total={totalCount} onPageChange={setPage} />
+          )}
+          {flights.length > 0 && <AircraftMetadataAttribution />}
         </DashboardCard>
 
         <div
@@ -360,7 +397,7 @@ export default function Dashboard() {
                       : 'var(--secondary-fixed-dim)'
                   }}
                 >
-                  {error ? 'FAULT / OFFLINE' : 'ACTIVE / ONLINE'}
+                  {error ? 'API UNAVAILABLE' : freshness || 'CONNECTING'}
                 </span>
               </div>
 
@@ -370,7 +407,7 @@ export default function Dashboard() {
                 </span>
 
                 <span className="hud-connection-value">
-                  OpenSky / Sandbox fallback
+                  {source || 'Awaiting source'}
                 </span>
               </div>
 
@@ -380,7 +417,8 @@ export default function Dashboard() {
                 </span>
 
                 <span className="hud-connection-value">
-                  {lastUpdatedString}
+                  Snapshot: {snapshotTimestamp ? new Date(snapshotTimestamp).toLocaleString() : 'Pending'}
+                  <br />Source: {lastUpdatedString}
                 </span>
               </div>
 
@@ -395,7 +433,7 @@ export default function Dashboard() {
                     color: 'var(--secondary-fixed-dim)'
                   }}
                 >
-                  {error ? 'DISCONNECTED' : 'SECURE REST'}
+                  {error ? 'DISCONNECTED' : 'REST API'}
                 </span>
               </div>
 

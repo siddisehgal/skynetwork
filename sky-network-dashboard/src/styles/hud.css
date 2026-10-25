@@ -1,5 +1,39 @@
 /* HUD styling for Sky Network Operations Center */
 
+.flight-registration {
+  display: inline-block;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.flight-data-sources {
+  border-top: 1px solid var(--outline-variant);
+  padding-top: 8px;
+  color: var(--on-surface-variant);
+  font-size: 10px;
+}
+
+.flight-data-sources summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--on-surface-variant);
+}
+
+.flight-data-sources summary:hover { color: var(--primary); }
+.flight-data-sources summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.flight-source-fields {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  overflow-wrap: anywhere;
+}
+
 .hud-layout {
   display: flex;
   min-height: 100vh;
@@ -233,6 +267,75 @@
   flex-grow: 1;
   padding: var(--margin-desktop);
   overflow-y: auto;
+}
+
+.data-freshness {
+  align-items: center;
+  color: var(--on-surface-variant);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+.data-freshness strong {
+  color: var(--secondary-fixed-dim);
+}
+
+.data-freshness-stale strong,
+.data-freshness-demo strong {
+  color: var(--tertiary-fixed-dim);
+}
+
+.data-freshness-error {
+  color: var(--error);
+}
+
+.flight-pagination,
+.flight-pagination > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.flight-pagination {
+  border-top: 1px solid var(--outline-variant);
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.flight-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.search-data-note {
+  color: var(--on-surface-variant);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.map-render-limit {
+  background: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius);
+  bottom: 18px;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  left: 12px;
+  padding: 7px 9px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1000;
 }
 
 /* Dashboard & Panel components */
@@ -470,10 +573,49 @@
   border: 1px solid rgba(255, 186, 32, 0.3);
 }
 
+.hud-badge-ground,
+.hud-badge-unknown {
+  background: var(--surface-container-high);
+  color: var(--on-surface-variant);
+  border: 1px solid var(--outline-variant);
+}
+
 .hud-badge-error {
   background: rgba(255, 180, 171, 0.15);
   color: var(--error);
   border: 1px solid rgba(255, 180, 171, 0.3);
+}
+
+.flight-observation-grid {
+  display: grid;
+  gap: 10px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 4px 0;
+}
+
+.flight-observation {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.flight-observation span,
+.flight-observation small {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.flight-observation strong {
+  color: var(--on-surface);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.flight-observation small {
+  text-transform: none;
 }
 
 .hud-progress-track {
@@ -951,7 +1093,7 @@
   display: block;
   color: #3d5560;
   font-family: monospace;
-  font-size: 9px;
+  font-size: 12px;
   margin-bottom: 15px;
 }
 
@@ -959,13 +1101,15 @@
   display: block;
   color: #d9e9ef;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
 }
 
 .sky-stat small {
   color: #536872;
   font-family: monospace;
-  font-size: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
 }
 
 /* Features */
@@ -1146,7 +1290,7 @@
 
 /* =========================================================
    SKYNETWORK — PUBLIC LANDING PAGE
-   Stitch / SKYCOMMAND HUD SYSTEM
+   Stitch / SKYNETWORK HUD SYSTEM
    ========================================================= */
 
 .home-page {
@@ -1279,10 +1423,10 @@
 
 .home-telemetry > div {
   min-width: 150px;
-  padding: 14px 24px;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   border-right: 1px solid var(--outline-variant);
 }
 
@@ -1290,20 +1434,17 @@
   border-right: 0;
 }
 
-.home-telemetry span,
-.home-telemetry strong {
-  font-size: 9px;
-  letter-spacing: 0.12em;
-}
-
 .home-telemetry span {
+  font-size: 13px;
+  letter-spacing: 0.1em;
   color: var(--on-surface-variant);
 }
 
 .home-telemetry strong {
+  font-size: 17px;
+  letter-spacing: 0.08em;
   color: var(--secondary-fixed-dim);
 }
-
 /* ---------- SECTIONS ---------- */
 
 .home-section {
@@ -2199,18 +2340,19 @@
 }
 
 .hud-profile-action {
-  width: 100%;
-  padding: 10px;
-
-  background: transparent;
-  border: 1px solid var(--outline-variant);
-
-  color: var(--on-surface);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-
-  cursor: pointer;
-}
+   width: 100%;
+ display: block;
+ box-sizing: border-box;
+ text-align: left;
+ text-decoration: none;
+   padding: 10px;
+   background: transparent;
+   border: 1px solid var(--outline-variant);
+   color: var(--on-surface);
+   font-size: 10px;
+   letter-spacing: 0.08em;
+   cursor: pointer;
+ }
 
 .hud-profile-action:hover {
   border-color: var(--secondary-fixed-dim);
@@ -2507,4 +2649,1549 @@ html[data-theme="light"] .hud-connection-panel
 html[data-theme="light"] .hud-connection-panel
   div[style*="fontSize: 9"] {
   color: var(--on-surface-variant) !important;
+}
+
+/* Presentation contrast fix */
+.hud-input,
+.hud-select {
+  background: #ffffff !important;
+  color: #172027 !important;
+  border: 1px solid #c8d2d8 !important;
+  color-scheme: light;
+}
+
+.hud-input::placeholder {
+  color: #71808a !important;
+  opacity: 1;
+}
+
+.hud-select option {
+  background: #ffffff;
+  color: #172027;
+}
+
+/* =========================================================
+   OPERATOR PROFILE
+   ========================================================= */
+
+.hud-profile {
+  width: 300px;
+  padding: 18px;
+}
+
+/* PROFILE HEADER */
+
+.hud-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.hud-profile-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.08);
+
+  color: var(--secondary-fixed-dim);
+
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+}
+
+.hud-profile-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hud-profile-identity strong {
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.hud-profile-identity span {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+
+/* ACCESS STATUS */
+
+.hud-profile-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 13px 0;
+
+  color: var(--secondary-fixed-dim);
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+
+/* PROFILE DETAILS */
+
+.hud-profile-details {
+  display: flex;
+  flex-direction: column;
+
+  border-top: 1px solid var(--outline-variant);
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.hud-profile-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 11px 0;
+
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.hud-profile-detail:last-child {
+  border-bottom: none;
+}
+
+.hud-profile-detail span {
+  color: var(--on-surface-variant);
+
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+.hud-profile-detail strong {
+  color: var(--on-surface);
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.hud-profile-online {
+  color: var(--secondary-fixed-dim) !important;
+}
+
+
+/* SETTINGS BUTTON */
+
+.hud-profile-action {
+  width: 100%;
+  margin-top: 14px;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+
+  color: var(--on-surface);
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.hud-profile-action:hover {
+  border-color: var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.06);
+  color: var(--secondary-fixed-dim);
+}
+
+/* =========================================================
+   SKYNETWORK — HOME PROFILE CREATION
+   ========================================================= */
+
+.home-profile-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 90px 32px;
+  border-top: 1px solid var(--outline-variant);
+}
+
+.home-profile-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 60px;
+  padding: 42px;
+  border: 1px solid var(--outline-variant);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.home-profile-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-profile-heading .profile-label {
+  color: var(--secondary-fixed-dim);
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.home-profile-heading h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.home-profile-heading p {
+  max-width: 430px;
+  margin: 0;
+  color: var(--on-surface-variant);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.home-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.home-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.home-profile-field label {
+  color: var(--on-surface-variant);
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.home-profile-field input,
+.home-profile-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+}
+
+.home-profile-field input::placeholder {
+  color: var(--on-surface-variant);
+  opacity: 0.65;
+}
+
+.home-profile-field input:focus,
+.home-profile-field select:focus {
+  border-color: var(--secondary-fixed-dim);
+  box-shadow: 0 0 0 1px rgba(0, 220, 255, 0.08);
+}
+
+.home-profile-submit {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 13px 20px;
+  border: 1px solid var(--secondary-fixed-dim);
+  background: var(--secondary-fixed-dim);
+  color: #061014;
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.home-profile-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 220, 255, 0.2);
+}
+
+.home-profile-note {
+  margin-top: 4px;
+  color: var(--on-surface-variant);
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+  .home-profile-section {
+    padding: 70px 20px;
+  }
+
+  .home-profile-card {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    padding: 28px;
+  }
+
+  .home-profile-heading h2 {
+    font-size: 27px;
+  }
+
+  .home-profile-submit {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   HOME — OPERATOR PROFILE
+   ========================================================= */
+
+.home-profile-section {
+  position: relative;
+  padding: 90px 7vw;
+  border-top: 1px solid var(--outline-variant);
+  background:
+    radial-gradient(
+      circle at 85% 50%,
+      rgba(0, 220, 255, 0.055),
+      transparent 35%
+    );
+}
+
+.home-profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  margin-bottom: 38px;
+}
+
+.home-profile-index {
+  color: var(--secondary-fixed-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding-top: 5px;
+}
+
+.home-profile-header h2 {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.home-profile-card {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  min-height: 270px;
+  border: 1px solid var(--outline-variant);
+  background: rgba(8, 18, 24, 0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.home-profile-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 220, 255, 0.035),
+      transparent 55%
+    );
+}
+
+.home-profile-card-copy {
+  position: relative;
+  z-index: 1;
+  padding: 38px;
+}
+
+.home-profile-card-copy h3 {
+  margin: 10px 0 12px;
+  font-family: var(--font-display);
+  font-size: 25px;
+  letter-spacing: 0.02em;
+}
+
+.home-profile-card-copy p {
+  max-width: 600px;
+  margin: 0;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.home-profile-preview {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border-left: 1px solid var(--outline-variant);
+  background: rgba(0, 220, 255, 0.025);
+}
+
+.home-profile-avatar-large {
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--secondary-fixed-dim);
+  color: var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.06);
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  box-shadow:
+    0 0 25px rgba(0, 220, 255, 0.08),
+    inset 0 0 25px rgba(0, 220, 255, 0.04);
+}
+
+.home-profile-preview-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.home-profile-preview-text strong {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.home-profile-preview-text span {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.home-profile-online {
+  color: var(--secondary-fixed-dim);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.home-profile-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 26px;
+  padding: 13px 18px;
+  border: 1px solid var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.06);
+  color: var(--secondary-fixed-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.home-profile-create-btn:hover {
+  background: rgba(0, 220, 255, 0.12);
+  box-shadow: 0 0 22px rgba(0, 220, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.home-profile-create-btn span {
+  font-size: 15px;
+}
+
+.home-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.home-profile-reset-btn {
+  margin-top: 26px;
+  padding: 13px 18px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.home-profile-reset-btn:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.home-profile-email {
+  margin-top: 14px;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.home-profile-card-active {
+  border-color: rgba(0, 220, 255, 0.25);
+}
+
+/* =========================================================
+   PROFILE MODAL
+   ========================================================= */
+
+.home-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 5, 9, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.home-profile-modal {
+  width: min(680px, 100%);
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45),
+    0 0 35px rgba(0, 220, 255, 0.05);
+}
+
+.home-profile-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.home-profile-modal-header > div > span {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.home-profile-modal-header h2 {
+  margin: 7px 0 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.home-profile-close {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface);
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.home-profile-close:hover {
+  border-color: var(--secondary-fixed-dim);
+  color: var(--secondary-fixed-dim);
+}
+
+.home-profile-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 28px;
+}
+
+.home-profile-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.home-profile-form-grid label > span {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.home-profile-form-grid input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid var(--outline-variant);
+  outline: none;
+  background: rgba(0, 220, 255, 0.025);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.home-profile-form-grid input::placeholder {
+  color: var(--outline);
+}
+
+.home-profile-form-grid input:focus {
+  border-color: var(--secondary-fixed-dim);
+  box-shadow: 0 0 14px rgba(0, 220, 255, 0.06);
+}
+
+.home-profile-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 28px;
+  border-top: 1px solid var(--outline-variant);
+}
+
+.home-profile-modal-footer > span {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.home-profile-save-btn {
+  padding: 13px 18px;
+  border: 1px solid var(--secondary-fixed-dim);
+  background: var(--secondary-fixed-dim);
+  color: #001014;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+}
+
+.home-profile-save-btn:hover {
+  box-shadow: 0 0 20px rgba(0, 220, 255, 0.16);
+}
+
+/* =========================================================
+   PROFILE RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .home-profile-section {
+    padding: 65px 5vw;
+  }
+
+  .home-profile-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-profile-preview {
+    min-height: 210px;
+    border-left: 0;
+    border-top: 1px solid var(--outline-variant);
+  }
+
+  .home-profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-profile-modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-profile-save-btn {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 520px) {
+
+  .home-profile-card-copy {
+    padding: 25px;
+  }
+
+  .home-profile-header h2 {
+    font-size: 27px;
+  }
+
+  .home-profile-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-profile-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-profile-modal-header {
+    padding: 20px;
+  }
+
+  .home-profile-form-grid {
+    padding: 20px;
+  }
+
+}
+
+/* =========================================================
+   HOME — OPERATOR PROFILE
+   ========================================================= */
+
+.home-profile-btn {
+  margin-top: 14px;
+  background: transparent;
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface-variant);
+  padding: 12px 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.home-profile-btn span {
+  margin-left: 10px;
+  color: var(--secondary-fixed-dim);
+}
+
+.home-profile-btn:hover {
+  border-color: var(--secondary-fixed-dim);
+  color: var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.04);
+}
+
+
+/* OVERLAY */
+
+.home-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(2, 8, 12, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+
+/* MODAL */
+
+.home-profile-modal {
+  width: min(520px, calc(100vw - 40px));
+
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+
+  box-shadow:
+    0 0 0 1px rgba(0, 220, 255, 0.03),
+    0 24px 80px rgba(0, 0, 0, 0.55);
+
+  padding: 28px;
+}
+
+
+/* HEADER */
+
+.home-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  padding-bottom: 22px;
+  margin-bottom: 24px;
+
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.home-profile-kicker {
+  display: block;
+
+  color: var(--on-surface-variant);
+
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+
+  margin-bottom: 8px;
+}
+
+.home-profile-header h2 {
+  margin: 0;
+
+  font-family: var(--font-display);
+  font-size: 25px;
+  letter-spacing: 0.04em;
+
+  color: var(--on-surface);
+}
+
+
+/* CLOSE */
+
+.home-profile-close {
+  background: transparent;
+  border: 0;
+
+  color: var(--on-surface-variant);
+
+  font-size: 26px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.home-profile-close:hover {
+  color: var(--secondary-fixed-dim);
+}
+
+
+/* FIELDS */
+
+.home-profile-field {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 18px;
+}
+
+.home-profile-field label {
+  margin-bottom: 7px;
+
+  color: var(--on-surface-variant);
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.13em;
+}
+
+.home-profile-field input {
+  width: 100%;
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.02);
+
+  border: 1px solid var(--outline-variant);
+
+  color: var(--on-surface);
+
+  padding: 12px 13px;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+
+  outline: none;
+
+  transition: border-color 0.2s ease,
+              background 0.2s ease;
+}
+
+.home-profile-field input::placeholder {
+  color: var(--outline);
+}
+
+.home-profile-field input:focus {
+  border-color: var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.035);
+}
+
+
+/* CREATE BUTTON */
+
+.home-profile-submit {
+  width: 100%;
+
+  margin-top: 8px;
+
+  padding: 14px 18px;
+
+  border: 1px solid var(--secondary-fixed-dim);
+
+  background: rgba(0, 220, 255, 0.08);
+
+  color: var(--secondary-fixed-dim);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.home-profile-submit:hover {
+  background: rgba(0, 220, 255, 0.14);
+  box-shadow: 0 0 20px rgba(0, 220, 255, 0.08);
+}
+
+
+/* CREATED PROFILE INDICATOR */
+
+.home-profile-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 14px;
+
+  color: var(--on-surface-variant);
+
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.home-profile-active-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--secondary-fixed-dim);
+
+  box-shadow: 0 0 8px var(--secondary-fixed-dim);
+}
+
+/* =========================================================
+   HOME — OPERATOR PROFILE
+   ========================================================= */
+
+.home-profile-entry {
+  margin-top: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 20px 0;
+  border-top: 1px solid var(--outline-variant);
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.home-profile-entry-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-profile-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--secondary-fixed-dim);
+}
+
+.home-profile-entry-copy strong {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--on-surface);
+}
+
+.home-profile-entry-copy > span:last-child {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--on-surface-variant);
+}
+
+.home-profile-btn {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--secondary-fixed-dim);
+  background: transparent;
+  color: var(--secondary-fixed-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.home-profile-btn:hover {
+  background: rgba(0, 220, 255, 0.08);
+  box-shadow: 0 0 18px rgba(0, 220, 255, 0.12);
+}
+
+
+/* =========================================================
+   PROFILE OVERLAY
+   ========================================================= */
+
+.home-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(2, 8, 12, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+
+/* =========================================================
+   PROFILE PANEL
+   ========================================================= */
+
+.home-profile-modal {
+  position: relative;
+  width: min(520px, 100%);
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  box-shadow:
+    0 0 0 1px rgba(0, 220, 255, 0.04),
+    0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.home-profile-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70px;
+  height: 2px;
+  background: var(--secondary-fixed-dim);
+  box-shadow: 0 0 12px rgba(0, 220, 255, 0.5);
+}
+
+
+/* =========================================================
+   PROFILE HEADER
+   ========================================================= */
+
+.home-profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 22px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.home-profile-modal-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-profile-modal-header span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--secondary-fixed-dim);
+}
+
+.home-profile-modal-header h2 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: var(--on-surface);
+}
+
+.home-profile-close {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.home-profile-close:hover {
+  color: var(--on-surface);
+  border-color: var(--secondary-fixed-dim);
+}
+
+
+/* =========================================================
+   PROFILE FORM
+   ========================================================= */
+
+.home-profile-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.home-profile-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--on-surface-variant);
+}
+
+.home-profile-form label:first-child {
+  grid-column: 1 / -1;
+}
+
+.home-profile-form input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--outline);
+  outline: none;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.home-profile-form input::placeholder {
+  color: var(--outline);
+}
+
+.home-profile-form input:focus {
+  border-color: var(--secondary-fixed-dim);
+  box-shadow: 0 0 12px rgba(0, 220, 255, 0.08);
+}
+
+
+/* =========================================================
+   CREATE BUTTON
+   ========================================================= */
+
+.home-profile-create {
+  width: 100%;
+  height: 44px;
+  margin-top: 24px;
+  border: 1px solid var(--secondary-fixed-dim);
+  background: rgba(0, 220, 255, 0.06);
+  color: var(--secondary-fixed-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.home-profile-create:hover {
+  background: rgba(0, 220, 255, 0.12);
+  box-shadow: 0 0 20px rgba(0, 220, 255, 0.12);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .home-profile-entry {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-profile-btn {
+    width: 100%;
+  }
+
+  .home-profile-form {
+    grid-template-columns: 1fr;
+  }
+
+  .home-profile-form label:first-child {
+    grid-column: auto;
+  }
+
+  .home-profile-modal {
+    padding: 22px;
+  }
+
+}
+
+
+/* =========================================================
+   HOME PAGE — OPERATOR PROFILE
+   ========================================================= */
+
+.home-profile-entry {
+  width: 100%;
+  max-width: 1100px;
+  margin: 48px auto 0;
+  padding: 22px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  border-top: 1px solid rgba(130, 180, 200, 0.16);
+  border-bottom: 1px solid rgba(130, 180, 200, 0.16);
+
+  background: rgba(8, 18, 24, 0.35);
+}
+
+.home-profile-entry-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-profile-label {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: #6f9aaa;
+}
+
+.home-profile-entry-copy strong {
+  font-family: monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: #d9e9ef;
+}
+
+.home-profile-entry-copy > span:last-child {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #536872;
+}
+
+.home-profile-btn {
+  flex-shrink: 0;
+
+  padding: 11px 18px;
+
+  border: 1px solid rgba(120, 210, 230, 0.35);
+  background: rgba(80, 180, 210, 0.06);
+
+  color: #a9dce8;
+
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.home-profile-btn:hover {
+  background: rgba(80, 180, 210, 0.12);
+  border-color: rgba(120, 210, 230, 0.65);
+  color: #d9f7ff;
+}
+
+
+/* =========================================================
+   PROFILE MODAL
+   ========================================================= */
+
+.home-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(2, 8, 12, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.home-profile-modal {
+  width: 100%;
+  max-width: 520px;
+
+  padding: 28px;
+
+  background: #071118;
+
+  border: 1px solid rgba(120, 210, 230, 0.25);
+
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(60, 180, 210, 0.05);
+}
+
+.home-profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 28px;
+}
+
+.home-profile-modal-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.home-profile-modal-header span {
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: #6f9aaa;
+}
+
+.home-profile-modal-header h2 {
+  margin: 0;
+
+  font-family: monospace;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+
+  color: #d9e9ef;
+}
+
+.home-profile-close {
+  width: 32px;
+  height: 32px;
+
+  border: 1px solid rgba(130, 180, 200, 0.2);
+  background: transparent;
+
+  color: #78929d;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.home-profile-close:hover {
+  color: #d9e9ef;
+  border-color: rgba(120, 210, 230, 0.45);
+}
+
+
+/* FORM */
+
+.home-profile-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.home-profile-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+
+  color: #718b96;
+}
+
+.home-profile-form label:first-child {
+  grid-column: 1 / -1;
+}
+
+.home-profile-form input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px 13px;
+
+  border: 1px solid rgba(130, 180, 200, 0.18);
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  color: #d9e9ef;
+
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.home-profile-form input::placeholder {
+  color: #3f565f;
+}
+
+.home-profile-form input:focus {
+  border-color: rgba(120, 210, 230, 0.55);
+  background: rgba(80, 180, 210, 0.04);
+}
+
+
+/* CREATE BUTTON */
+
+.home-profile-create {
+  width: 100%;
+
+  margin-top: 24px;
+  padding: 13px 18px;
+
+  border: 1px solid rgba(120, 210, 230, 0.4);
+
+  background: rgba(80, 180, 210, 0.08);
+
+  color: #b8e8f2;
+
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.home-profile-create:hover {
+  background: rgba(80, 180, 210, 0.15);
+  border-color: rgba(120, 210, 230, 0.7);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .home-profile-entry {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-profile-btn {
+    width: 100%;
+  }
+
+  .home-profile-form {
+    grid-template-columns: 1fr;
+  }
+
+  .home-profile-form label:first-child {
+    grid-column: auto;
+  }
+
+}
+
+/* =========================================================
+   HOME NAV — OPERATOR PROFILE CHIP (top-right corner)
+   ========================================================= */
+
+.sky-home-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sky-home-nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px 6px 6px;
+  background: transparent;
+  border: 1px solid rgba(130, 180, 200, 0.25);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.sky-home-nav-profile:hover {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.06);
+}
+
+.sky-home-nav-profile-avatar {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.14);
+  color: #00e5ff;
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.sky-home-nav-profile-text {
+  color: #d8e8ee;
+  font-family: monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .sky-home-nav-profile-text {
+    display: none;
+  }
+
+  .sky-home-nav-profile {
+    padding: 6px;
+  }
 }

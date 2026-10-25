@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { searchFlights } from '../api/client';
+import React, { useState } from 'react';
 import { FlightCard } from '../components/FlightCard';
+import { AircraftMetadataAttribution } from '../components/AircraftMetadataAttribution';
 import { SearchBar } from '../components/SearchBar';
 import { DashboardCard } from '../components/DashboardCard';
-import { normalizeFlights } from '../utils/normalize';
+import { DataFreshness } from '../components/DataFreshness';
+import { Pagination } from '../components/Pagination';
+import { useLiveFlights } from '../hooks/useLiveFlights';
+import { filterFlights } from '../utils/filterFlights';
 
 const initialFilters = {
   flightNumber: '',
@@ -15,151 +18,33 @@ const initialFilters = {
   status: '',
 };
 
-function SearchSkeleton() {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: 'var(--gutter)',
-      }}
-    >
-      {[1, 2, 3, 4].map((i) => (
-        <div
-          key={i}
-          className="hud-panel"
-          style={{
-            height: 160,
-            padding: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="hud-skeleton" style={{ height: 16, width: '40%' }} />
-            <div className="hud-skeleton" style={{ height: 16, width: '20%' }} />
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              margin: '12px 0',
-            }}
-          >
-            <div className="hud-skeleton" style={{ height: 24, width: '25%' }} />
-            <div className="hud-skeleton" style={{ height: 10, width: '30%' }} />
-            <div className="hud-skeleton" style={{ height: 24, width: '25%' }} />
-          </div>
-
-          <div className="hud-skeleton" style={{ height: 20, width: '100%' }} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function Search() {
+  const { flights, freshness, source, snapshotTimestamp, sourceTimestamp, sourceError, sourceErrorCode } = useLiveFlights();
   const [filters, setFilters] = useState(initialFilters);
-  const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const controllerRef = useRef(null);
-  const latestRequestRef = useRef(0);
-
-  useEffect(() => () => controllerRef.current?.abort(), []);
+  const [submitted, setSubmitted] = useState(false);
+  const [page, setPage] = useState(0);
+  const pageSize = 30;
+  const results = submitted ? filterFlights(flights, filters) : null;
+  const currentPage = Math.min(page, Math.max(0, Math.ceil((results?.length || 0) / pageSize) - 1));
+  const visibleResults = results?.slice(currentPage * pageSize, (currentPage + 1) * pageSize) || [];
 
   function updateFilter(event) {
     const { name, value } = event.target;
     setFilters((current) => ({ ...current, [name]: value }));
+    setPage(0);
   }
 
-  async function handleSubmit(event) {
+  function handleSubmit(event) {
     if (event) event.preventDefault();
-
-    controllerRef.current?.abort();
-
-    const controller = new AbortController();
-    const requestId = latestRequestRef.current + 1;
-
-    controllerRef.current = controller;
-    latestRequestRef.current = requestId;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const activeFilters = {
-        ...(filters.flightNumber && {
-          flightCode: filters.flightNumber,
-        }),
-        ...(filters.origin && {
-          departure: filters.origin,
-        }),
-        ...(filters.destination && {
-          arrival: filters.destination,
-        }),
-        ...(filters.status && {
-          status: filters.status,
-        }),
-        ...(filters.callsign && {
-          callsign: filters.callsign,
-        }),
-        ...(filters.airline && {
-          airline: filters.airline,
-        }),
-        ...(filters.aircraftRegistration && {
-          aircraftRegistration: filters.aircraftRegistration,
-        }),
-      };
-
-      const response = await searchFlights(
-        {
-          ...activeFilters,
-          limit: 50,
-          offset: 0,
-        },
-        {
-          signal: controller.signal,
-        }
-      );
-
-          if (requestId === latestRequestRef.current) {
-        setResults(response.data);
-      }
-    } catch (requestError) {
-      if (
-        requestId === latestRequestRef.current &&
-        requestError?.code !== 'ERR_CANCELED'
-      ) {
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : 'Unable to search flights'
-        );
-
-        setResults(null);
-      }
-    } finally {
-      if (requestId === latestRequestRef.current) {
-        setLoading(false);
-      }
-    }
+    setSubmitted(true);
+    setPage(0);
   }
 
   function clearSearch() {
-    controllerRef.current?.abort();
-    latestRequestRef.current += 1;
-
     setFilters(initialFilters);
-    setResults(null);
-    setError(null);
+    setSubmitted(false);
+    setPage(0);
   }
-
-  // Normalize search results
-  const normalizedResults = results ? normalizeFlights(results) : null;
 
   return (
     <div
@@ -191,6 +76,7 @@ export default function Search() {
         >
           Search tracked network nodes
         </p>
+        <DataFreshness freshness={freshness} source={source} snapshotTimestamp={snapshotTimestamp} sourceTimestamp={sourceTimestamp} error={sourceError} errorCode={sourceErrorCode} />
       </div>
 
       {/* Global Operations Search Card */}
@@ -218,39 +104,16 @@ export default function Search() {
           onChange={updateFilter}
           onSubmit={handleSubmit}
           onClear={clearSearch}
-          loading={loading}
+          loading={false}
         />
       </DashboardCard>
 
-      {/* Error State */}
-      {error && (
-        <div
-          style={{
-            background: 'var(--error-container)',
-            color: 'var(--on-error-container)',
-            padding: 16,
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--error)',
-            fontSize: 13,
-          }}
-        >
-          <strong>SEARCH FAULT:</strong> Couldn&apos;t execute query. Details:{' '}
-          {error}
-        </div>
-      )}
-
       {/* Results Panel */}
-      {(loading || normalizedResults) && (
+      {results && (
         <DashboardCard
-          title={
-            loading
-              ? 'Executing Search Query...'
-              : `Query Results (${normalizedResults.length} matching nodes)`
-          }
+          title={`Query Results (${results.length} matching records in ${flights.length})`}
         >
-          {loading ? (
-            <SearchSkeleton />
-          ) : normalizedResults.length === 0 ? (
+          {results.length === 0 ? (
             <div className="hud-empty-state">
               <span className="hud-empty-icon">🔍</span>
 
@@ -281,11 +144,13 @@ export default function Search() {
                 gap: 'var(--gutter)',
               }}
             >
-              {normalizedResults.map((flight) => (
+              {visibleResults.map((flight) => (
                 <FlightCard key={flight.id} flight={flight} />
               ))}
             </div>
           )}
+          <Pagination page={currentPage} pageSize={pageSize} total={results.length} onPageChange={setPage} />
+          {results.length > 0 && <AircraftMetadataAttribution />}
         </DashboardCard>
       )}
     </div>

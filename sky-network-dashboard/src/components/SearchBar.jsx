@@ -13,7 +13,7 @@ export function SearchBar({ filters, onChange, onSubmit, onClear, loading }) {
   return (
     <form onSubmit={onSubmit} className="hud-search-form">
       <div className="hud-input-group">
-        <label className="hud-input-label">Flight Number</label>
+        <label className="hud-input-label">Flight / ICAO24</label>
         <input
           type="text"
           name="flightNumber"
@@ -94,11 +94,9 @@ export function SearchBar({ filters, onChange, onSubmit, onClear, loading }) {
         >
           <option value="">ALL STATUSES</option>
           <option value="IN-FLIGHT">IN FLIGHT</option>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="ON TIME">ON TIME</option>
+          <option value="ON-GROUND">ON GROUND</option>
+          <option value="UNKNOWN">UNKNOWN</option>
           <option value="DELAYED">DELAYED</option>
-          <option value="PENDING">PENDING</option>
-          <option value="ON GROUND">ON GROUND</option>
         </select>
       </div>
 
@@ -122,6 +120,9 @@ export function SearchBar({ filters, onChange, onSubmit, onClear, loading }) {
           Clear
         </button>
       </div>
+      <p className="search-data-note">
+        OpenSky state vectors do not include origin, destination, or aircraft registration. Those filters match only enriched records; ICAO24 is the available aircraft identifier.
+      </p>
     </form>
   );
 }

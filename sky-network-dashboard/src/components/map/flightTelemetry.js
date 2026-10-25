@@ -3,7 +3,7 @@ export function formatAltitude(value) {
 }
 
 export function formatSpeedInKnots(value) {
-  return Number.isFinite(value) ? `${Math.round(value * 1.943844).toLocaleString()} kt` : 'Unavailable';
+  return Number.isFinite(value) ? `${Math.round(value).toLocaleString()} kt` : 'Unavailable';
 }
 
 export function formatHeading(value) {

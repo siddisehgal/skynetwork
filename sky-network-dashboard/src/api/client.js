@@ -17,13 +17,23 @@ export async function getLiveFlights() {
 
   return {
     flights: data.data,
-    timestamp: data.timestamp,
+    source: data.source,
+    freshness: data.freshness,
+    snapshotTimestamp: data.snapshotTimestamp,
+    sourceTimestamp: data.sourceTimestamp,
+    sourceError: data.error || data.sourceError || null,
+    sourceErrorCode: data.errorCode || data.sourceErrorCode || null,
   };
 }
 
 export async function getFlightByCode(flightCode) {
   const { data } = await api.get(`/api/flights/${flightCode}`);
   return data.data;
+}
+
+export async function getAircraftMetadata(icao24) {
+  const { data } = await api.get(`/api/flights/aircraft/${encodeURIComponent(icao24)}`);
+  return data;
 }
 
 export async function searchFlights(filters = {}, options = {}) {

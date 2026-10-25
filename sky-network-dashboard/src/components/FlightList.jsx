@@ -1,39 +1,145 @@
-export function FlightList({ flights = [] }) {
+import { useEffect, useRef, useState } from 'react';
+import { Pagination } from './Pagination';
+import { flightKey } from '../utils/flightSelection';
+import { hasFlightPosition } from './map/flightPosition';
+import { FlightPopup } from './map/FlightPopup';
+import { AircraftMetadataAttribution } from './AircraftMetadataAttribution';
+
+export function FlightList({
+  flights = [],
+  selectedKey = null,
+  selectionRevision = 0,
+  onSelectFlight,
+}) {
+  const [page, setPage] = useState(0);
+  const selectedCard = useRef(null);
+  const pageSize = 12;
+
+  const selectedIndex = selectedKey
+    ? flights.findIndex((flight) => flightKey(flight) === selectedKey)
+    : -1;
+
+  const currentPage = Math.min(
+    page,
+    Math.max(0, Math.ceil(flights.length / pageSize) - 1)
+  );
+
+  const visibleFlights = flights.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize
+  );
+
+  useEffect(() => {
+    if (selectedIndex >= 0) {
+      setPage(Math.floor(selectedIndex / pageSize));
+    }
+  }, [selectedIndex, selectionRevision]);
+
+  useEffect(() => {
+    selectedCard.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'instant',
+    });
+  }, [selectedKey, selectionRevision, currentPage]);
+
   return (
     <div>
-      <h3 style={{ marginBottom: "16px" }}>
+      <h3 style={{ marginBottom: 16 }}>
         Active Flights ({flights.length})
       </h3>
 
-      {flights.map((flight) => (
-        <div
-          key={flight.id || flight.icao24}
-          style={{
-            padding: "12px",
-            marginBottom: "12px",
-            border: "1px solid var(--outline)",
-            borderRadius: "8px",
-            background: "var(--surface)",
-            cursor: "pointer",
-          }}
-        >
-          <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
-            ✈ {flight.flightNumber || flight.callsign || "Unknown Flight"}
-          </div>
+      {visibleFlights.map((flight) => {
+        const key = flightKey(flight);
+        const selected = Boolean(key) && key === selectedKey;
+        const hasPosition = hasFlightPosition(flight);
 
-          <div style={{ fontSize: "13px" }}>
-            <strong>Altitude:</strong> {flight.altitude || "--"} ft
-          </div>
+        return (
+          <div
+            key={key}
+            style={{ marginBottom: 12 }}
+            ref={selected ? selectedCard : undefined}
+          >
+            <button
+              type="button"
+              className="active-flight-card"
+              aria-pressed={selected}
+              disabled={!key}
+              onClick={() => onSelectFlight?.(flight)}
+              aria-label={`Select aircraft ${
+                flight.callsign ||
+                flight.flightNumber ||
+                flight.icao24 ||
+                flight.id
+              }`}
+            >
+              <span
+                style={{
+                  display: 'block',
+                  fontWeight: 'bold',
+                  marginBottom: 8,
+                }}
+              >
+                {flight.flightNumber || flight.callsign || 'Unknown flight'}
 
-          <div style={{ fontSize: "13px" }}>
-            <strong>Speed:</strong> {flight.speed || "--"} kt
-          </div>
+                {selected && (
+                  <span className="active-flight-selected-label">
+                    Selected
+                  </span>
+                )}
+              </span>
 
-          <div style={{ fontSize: "13px" }}>
-            <strong>Heading:</strong> {flight.heading || "--"}°
+              {Number.isFinite(flight.altitudeFt) && (
+                <span className="active-flight-value">
+                  <strong>Altitude:</strong>{' '}
+                  {Math.round(flight.altitudeFt).toLocaleString()} ft
+                </span>
+              )}
+
+              {Number.isFinite(flight.speedKnots) && (
+                <span className="active-flight-value">
+                  <strong>Speed:</strong>{' '}
+                  {Math.round(flight.speedKnots)} kt
+                </span>
+              )}
+
+              {Number.isFinite(flight.heading) && (
+                <span className="active-flight-value">
+                  <strong>Heading:</strong>{' '}
+                  {Math.round(flight.heading)}&deg;
+                </span>
+              )}
+
+              {!hasPosition && (
+                <span className="active-flight-value">
+                  Position unavailable; select for details
+                </span>
+              )}
+            </button>
+
+            {selected && !hasPosition && (
+              <div
+                className="active-flight-details"
+                role="region"
+                aria-label="Selected aircraft details"
+              >
+                <p role="status">
+                  Position unavailable. Map view unchanged.
+                </p>
+                <FlightPopup flight={flight} />
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
+
+      <Pagination
+        page={currentPage}
+        pageSize={pageSize}
+        total={flights.length}
+        onPageChange={setPage}
+      />
+
+      {flights.length > 0 && <AircraftMetadataAttribution />}
     </div>
   );
 }

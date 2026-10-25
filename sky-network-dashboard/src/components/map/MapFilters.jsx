@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
+import { getMapAirlineOptions, UNKNOWN_OPERATOR_FILTER } from '../../utils/mapAirlineFilters';
 
-export function MapFilters({ flights, filters, onChange }) {
-  const airlines = useMemo(
-    () => Array.from(new Set(flights.map((f) => f.airline).filter(Boolean))).sort(),
-    [flights],
-  );
+export function MapFilters({ flights, snapshotFlights = flights, filters, onChange }) {
+  const { operators, unknownCount } = useMemo(() => getMapAirlineOptions(snapshotFlights), [snapshotFlights]);
   const statuses = useMemo(
     () => Array.from(new Set(flights.map((f) => f.status).filter(Boolean))).sort(),
     [flights],
@@ -25,9 +23,12 @@ export function MapFilters({ flights, filters, onChange }) {
       <div className="map-filter-field">
         <label className="label-caps" htmlFor="filter-airline">Airline</label>
         <select id="filter-airline" value={filters.airline} onChange={(e) => update('airline', e.target.value)}>
-          <option value="">All airlines</option>
-          {airlines.map((a) => (
-            <option key={a} value={a}>{a}</option>
+          <option value="">All airlines · {snapshotFlights.length} aircraft</option>
+          <option value={UNKNOWN_OPERATOR_FILTER}>Unknown operator · {unknownCount} aircraft</option>
+          {operators.map((operator) => (
+            <option key={operator.code} value={operator.code}>
+              {operator.name} ({operator.code}) · {operator.count} aircraft
+            </option>
           ))}
         </select>
       </div>
@@ -85,24 +86,3 @@ export function MapFilters({ flights, filters, onChange }) {
     </div>
   );
 }
-
-export function applyMapFilters(flights, filters) {
-  return flights.filter((flight) => {
-    if (filters.airline && flight.airline !== filters.airline) return false;
-    if (filters.status && flight.status !== filters.status) return false;
-
-    const altitude = flight.currentAltitude;
-    if (filters.minAltitude !== '' && !(altitude >= Number(filters.minAltitude))) return false;
-    if (filters.maxAltitude !== '' && !(altitude <= Number(filters.maxAltitude))) return false;
-
-    return true;
-  });
-}
-
-export const defaultMapFilters = {
-  airline: '',
-  status: '',
-  minAltitude: '',
-  maxAltitude: '',
-  showRoutes: true,
-};

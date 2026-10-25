@@ -1,6 +1,43 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const [profile, setProfile] = useState(() => {
+    const saved = localStorage.getItem('skynetwork-profile');
+    return saved
+      ? JSON.parse(saved)
+      : { name: '', role: '', organization: '', initials: '' };
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((current) => ({ ...current, [name]: value }));
+  };
+
+  const createProfile = () => {
+    if (!profile.name || !profile.role || !profile.organization) return;
+
+    const generatedInitials = profile.name
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase();
+
+    const finalProfile = {
+      ...profile,
+      initials: (profile.initials || generatedInitials).toUpperCase(),
+    };
+
+    localStorage.setItem('skynetwork-profile', JSON.stringify(finalProfile));
+    setProfile(finalProfile);
+    setProfileOpen(false);
+  };
+
   return (
     <div className="sky-home">
 
@@ -17,9 +54,31 @@ export default function Home() {
           <Link to="/search">Global Search</Link>
         </nav>
 
-        <div className="sky-home-nav-status">
-          <span className="sky-status-dot" />
-          SYSTEM OPERATIONAL
+        <div className="sky-home-nav-right">
+
+          <div className="sky-home-nav-status">
+            <span className="sky-status-dot" />
+            SYSTEM OPERATIONAL
+          </div>
+
+          {/* =================================================
+              OPERATOR PROFILE — NAV CORNER
+          ================================================= */}
+
+          <button
+            className="sky-home-nav-profile"
+            onClick={() => setProfileOpen(true)}
+            aria-label={profile.name ? 'Edit operator profile' : 'Create operator profile'}
+          >
+            <span className="sky-home-nav-profile-avatar">
+              {profile.name ? profile.initials : '+'}
+            </span>
+
+            <span className="sky-home-nav-profile-text">
+              {profile.name ? profile.name.toUpperCase() : 'CREATE PROFILE'}
+            </span>
+          </button>
+
         </div>
       </header>
 
@@ -109,6 +168,109 @@ export default function Home() {
 
       </section>
 
+      {/* =====================================================
+          PROFILE MODAL
+      ===================================================== */}
+
+      {profileOpen && (
+
+        <div
+          className="home-profile-overlay"
+          onClick={() => setProfileOpen(false)}
+        >
+
+          <div
+            className="home-profile-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <div className="home-profile-modal-header">
+
+              <div>
+
+                <span>
+                  SKYNETWORK / OPERATOR ID
+                </span>
+
+                <h2>
+                  {profile.name ? 'EDIT PROFILE' : 'CREATE PROFILE'}
+                </h2>
+
+              </div>
+
+              <button
+                className="home-profile-close"
+                onClick={() => setProfileOpen(false)}
+                aria-label="Close profile"
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div className="home-profile-form">
+
+              <label>
+                OPERATOR NAME
+
+                <input
+                  type="text"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleChange}
+                  placeholder="ENTER NAME"
+                />
+              </label>
+
+              <label>
+                ROLE
+
+                <input
+                  type="text"
+                  name="role"
+                  value={profile.role}
+                  onChange={handleChange}
+                  placeholder="E.G. AVIATION ANALYST"
+                />
+              </label>
+
+              <label>
+                ORGANIZATION
+
+                <input
+                  type="text"
+                  name="organization"
+                  value={profile.organization}
+                  onChange={handleChange}
+                  placeholder="ENTER ORGANIZATION"
+                />
+              </label>
+
+              <label>
+                INITIALS
+
+                <input
+                  type="text"
+                  name="initials"
+                  maxLength={3}
+                  value={profile.initials}
+                  onChange={handleChange}
+                  placeholder="AUTO"
+                />
+              </label>
+
+            </div>
+
+            <button className="home-profile-create" onClick={createProfile}>
+              {profile.name ? 'SAVE PROFILE →' : 'CREATE PROFILE →'}
+            </button>
+
+          </div>
+
+        </div>
+
+      )}
+
       {/* STATS */}
       <section className="sky-home-stats">
 
@@ -163,7 +325,7 @@ export default function Home() {
 
           <Link to="/analytics" className="sky-feature-card">
             <span className="sky-feature-number">02</span>
-            <div className="sky-feature-icon">▥</div>
+            <div className="sky-feature-icon">▣</div>
             <h3>NETWORK ANALYTICS</h3>
             <p>
               Transform aviation telemetry into operational
@@ -176,7 +338,7 @@ export default function Home() {
 
           <Link to="/map" className="sky-feature-card">
             <span className="sky-feature-number">03</span>
-            <div className="sky-feature-icon">◇</div>
+            <div className="sky-feature-icon">◈</div>
             <h3>MRO INTELLIGENCE</h3>
             <p>
               Discover aircraft maintenance facilities, capabilities,

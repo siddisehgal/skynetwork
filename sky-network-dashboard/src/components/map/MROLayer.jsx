@@ -1,8 +1,17 @@
 import { CircleMarker, Popup } from 'react-leaflet';
 
-export function MROLayer({ facilities = [] }) {
-  
+function formatList(value) {
+  const items = Array.isArray(value)
+    ? value
+    : String(value || '').split(';');
 
+  return items
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .join(', ') || 'Not available';
+}
+
+export function MROLayer({ facilities = [] }) {
   return (
     <>
       {facilities.map((facility) => (
@@ -10,15 +19,15 @@ export function MROLayer({ facilities = [] }) {
           key={facility.id}
           center={[
             Number(facility.latitude),
-            Number(facility.longitude)
+            Number(facility.longitude),
           ]}
           radius={7}
-pathOptions={{
-  color: '#ffb300',
-  fillColor: '#ffb300',
-  fillOpacity: 0.9,
-  weight: 2
-}}
+          pathOptions={{
+            color: '#ffb300',
+            fillColor: '#ffb300',
+            fillOpacity: 0.9,
+            weight: 2,
+          }}
           pane="markerPane"
         >
           <Popup>
@@ -47,13 +56,13 @@ pathOptions={{
               <div>
                 <strong>Capabilities:</strong>
                 <br />
-                {facility.capabilities}
+                {formatList(facility.capabilities)}
               </div>
 
               <div>
                 <strong>Aircraft:</strong>
                 <br />
-                {facility.aircraft_supported}
+                {formatList(facility.aircraft_supported)}
               </div>
             </div>
           </Popup>

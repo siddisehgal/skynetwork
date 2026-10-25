@@ -1,5 +1,7 @@
 import React from 'react';
+import { FlightDataSources } from './FlightDataSources';
 import { normalizeFlight } from '../utils/normalize';
+import { formatTimestamp } from './map/flightTelemetry';
 
 // Helper to determine status badge classes
 function getStatusClass(status) {
@@ -7,28 +9,34 @@ function getStatusClass(status) {
   if (s.includes('DELAY')) return 'hud-badge-delayed';
   if (s.includes('ACTIVE') || s.includes('IN-FLIGHT')) return 'hud-badge-active';
   if (s.includes('TIME')) return 'hud-badge-ontime';
-  return 'hud-badge-error';
+  if (s.includes('GROUND')) return 'hud-badge-ground';
+  return 'hud-badge-unknown';
 }
 
 export function FlightCard({ flight: rawFlight }) {
   const flight = normalizeFlight(rawFlight);
   if (!flight) return null;
 
+  const registration = flight.aircraftRegistration !== '---' ? flight.aircraftRegistration : null;
+  const aircraftType = flight.aircraft !== '---' ? flight.aircraft : null;
+
   // Formatting values
-  const altText = flight.altitude != null ? `${Math.round(flight.altitude).toLocaleString()} ft` : '---';
-  const speedText = flight.speed != null ? `${Math.round(flight.speed)} kt` : '---';
+  const altText = flight.altitudeFt != null ? `${Math.round(flight.altitudeFt).toLocaleString()} ft` : 'Unavailable';
+  const speedText = flight.speedKnots != null ? `${Math.round(flight.speedKnots)} kt` : 'Unavailable';
   const headingText = flight.heading != null ? `${Math.round(flight.heading)}°` : '---';
-  
-  // Vertical rate arrow
-  let vRateArrow = '→';
-  let vRateText = 'CRUISE';
-  if (flight.verticalRate > 100) {
-    vRateArrow = '↗';
-    vRateText = 'CLIMB';
-  } else if (flight.verticalRate < -100) {
-    vRateArrow = '↘';
-    vRateText = 'DESCENT';
-  }
+  const hasRoute = flight.departureCode !== '---' && flight.arrivalCode !== '---';
+  const verticalRate = flight.verticalRateFpm;
+  const verticalLabel = verticalRate == null
+    ? 'RATE UNAVAILABLE'
+    : verticalRate > 300
+      ? 'CLIMB'
+      : verticalRate < -300
+        ? 'DESCENT'
+        : 'LEVEL';
+  const coordinates = flight.currentPosition;
+  const coordinateText = Number.isFinite(coordinates?.latitude) && Number.isFinite(coordinates?.longitude)
+    ? `${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}`
+    : 'Unavailable';
 
   return (
     <article
@@ -57,31 +65,45 @@ export function FlightCard({ flight: rawFlight }) {
         </span>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '4px 0' }}>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>
-            {flight.departureCode || '---'}
-          </span>
-          <span style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>Origin</span>
-        </div>
-        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px' }}>
-          <span className="font-mono" style={{ fontSize: 12, color: 'var(--surface-tint)' }}>
-            {vRateArrow} {vRateText}
-          </span>
-          <div className="hud-progress-track">
-            <div className="hud-progress-fill" style={{ width: `${flight.progress || 0}%` }} />
+      {hasRoute ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '4px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>{flight.departureCode}</span>
+            <span style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>Origin</span>
           </div>
-          <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', marginTop: 4 }}>
-            {flight.progress || 0}% Complete
-          </span>
+          <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 12px' }}>
+            <span className="font-mono" style={{ fontSize: 12, color: 'var(--surface-tint)' }}>{verticalLabel}</span>
+            <span style={{ color: 'var(--surface-tint)' }}>→</span>
+            <span style={{ fontSize: 10, color: 'var(--on-surface-variant)', marginTop: 4 }}>
+              {verticalRate == null ? 'Vertical rate unavailable' : `${Math.round(verticalRate).toLocaleString()} ft/min`}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <span className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>{flight.arrivalCode}</span>
+            <span style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>Destination</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <span className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: 'var(--on-surface)' }}>
-            {flight.arrivalCode || '---'}
-          </span>
-          <span style={{ fontSize: 10, color: 'var(--on-surface-variant)' }}>Destination</span>
+      ) : (
+        <div className="flight-observation-grid">
+          <div className="flight-observation">
+            <span>Operator</span>
+            <strong>{flight.airline}</strong>
+            <small>{flight.airlineCode !== '---' ? `ICAO ${flight.airlineCode}` : 'ICAO code unavailable'}</small>
+          </div>
+          <div className="flight-observation">
+            <span>Observed position</span>
+            <strong className="font-mono">{coordinateText}</strong>
+          </div>
+          <div className="flight-observation">
+            <span>Observation time</span>
+            <strong>{formatTimestamp(flight.lastUpdated)}</strong>
+          </div>
+          <div className="flight-observation">
+            <span>Vertical rate · {verticalLabel}</span>
+            <strong>{verticalRate == null ? 'Unavailable' : `${Math.round(verticalRate).toLocaleString()} ft/min`}</strong>
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', borderTop: '1px dashed var(--outline-variant)', paddingTop: '10px' }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -98,10 +120,14 @@ export function FlightCard({ flight: rawFlight }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10, color: 'var(--on-surface-variant)', borderTop: '1px solid var(--outline-variant)', paddingTop: '8px', marginTop: '4px' }}>
-        <span>SRC: {String(flight.source).toUpperCase()}</span>
-        <span>A/C: {flight.aircraft}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 10, color: 'var(--on-surface-variant)', borderTop: '1px solid var(--outline-variant)', paddingTop: '8px', marginTop: '4px' }}>
+        <span>LIVE TELEMETRY: {String(flight.source).toUpperCase()}</span>
+        <span>ICAO24: {flight.icao24}</span>
+        <span>REGISTRATION (METADATA): <span className="flight-registration">{registration || 'Not available'}</span></span>
+        <span>A/C TYPE (METADATA): {aircraftType || 'Not available'}</span>
+        <span>ICAO TYPE: {flight.aircraftIcaoType === '---' ? 'Not available' : flight.aircraftIcaoType}</span>
       </div>
+      <FlightDataSources flight={flight} />
     </article>
   );
 }

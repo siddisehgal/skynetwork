@@ -1,69 +1,78 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { getLiveFlights } from '../api/client';
 import { normalizeFlights } from '../utils/normalize';
 
-export function useLiveFlights(pollMs = 15000) {
-  const [flights, setFlights] = useState([]);
-  const [lastSync, setLastSync] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const POLL_MS = 15000;
+let snapshot = {
+  flights: [],
+  source: null,
+  freshness: null,
+  snapshotTimestamp: null,
+  sourceTimestamp: null,
+  sourceError: null,
+  sourceErrorCode: null,
+  loading: true,
+  error: null,
+};
+let timer;
+let inFlight;
+let consumers = 0;
+const listeners = new Set();
+
+function publish(nextSnapshot) {
+  snapshot = nextSnapshot;
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+  return snapshot;
+}
+
+async function refresh() {
+  if (inFlight) return inFlight;
+
+  inFlight = getLiveFlights()
+    .then((result) => {
+      publish({
+        ...result,
+        flights: normalizeFlights(result.flights),
+        loading: false,
+        error: null,
+      });
+    })
+    .catch((error) => {
+      publish({
+        ...snapshot,
+        freshness: snapshot.source === 'OPENSKY' ? 'STALE' : snapshot.freshness,
+        loading: false,
+        error: error instanceof Error ? error.message : 'Unable to retrieve flights',
+      });
+    })
+    .finally(() => {
+      inFlight = null;
+      if (consumers > 0) timer = window.setTimeout(refresh, POLL_MS);
+    });
+
+  return inFlight;
+}
+
+export function useLiveFlights() {
+  const current = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   useEffect(() => {
-    let cancelled = false;
-    let timer;
-
-    async function load() {
-      try {
-        const data = await getLiveFlights();
-
-     
-        console.log('LIVE FLIGHTS RESPONSE:', data);
-console.log('TIMESTAMP:', data?.timestamp);
-console.log('FIRST FLIGHT:', data?.flights?.[0]);
-
-        if (!cancelled) {
-          const normalized = normalizeFlights(data.flights).map((flight) => ({
-            ...flight,
-            lastUpdated: flight.lastUpdated || data.timestamp
-          }));
-
-          setFlights(normalized);
-
-          if (data.timestamp) {
-            setLastSync(data.timestamp);
-          }
-
-          setError(null);
-          setLoading(false);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'Unknown request error'
-          );
-          setLoading(false);
-        }
-      } finally {
-        if (!cancelled) {
-          timer = window.setTimeout(load, pollMs);
-        }
-      }
-    }
-
-    load();
+    consumers += 1;
+    if (consumers === 1) refresh();
 
     return () => {
-      cancelled = true;
-      clearTimeout(timer);
+      consumers -= 1;
+      if (consumers === 0) window.clearTimeout(timer);
     };
-  }, [pollMs]);
+  }, []);
 
-  return {
-    flights,
-    lastSync,
-    loading,
-    error
-  };
+  return current;
 }

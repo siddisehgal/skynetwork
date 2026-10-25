@@ -49,36 +49,53 @@ export function normalizeFlight(flight) {
     ? String(flight.id)
     : (flight.flightNumber || flight.flightCode || 'unknown-id');
 
+  const altitudeFt = flight.altitudeFt ?? flight.altitude ?? flight.currentAltitude ?? null;
+  const speedKnots = flight.speedKnots ?? flight.groundSpeed ?? flight.speed ?? flight.velocity ?? flight.currentPosition?.speed ?? null;
+  const heading = flight.heading ?? flight.track ?? flight.currentPosition?.heading ?? null;
+  const hasPosition = Boolean(rawPos) || lat != null || lng != null;
+  const aircraftMetadata = flight.aircraftMetadata || null;
+
   const normalized = {
     // Primary ID (guaranteed string)
     id: idVal,
 
     // Identifiers
-    flightNumber: stringify(flight.flightNumber || flight.flightCode),
-    callsign: stringify(flight.callsign),
-    airlineCode: stringify(flight.airlineCode || flight.airline),
+    flightNumber: stringify(flight.flightNumber || flight.flightCode, 'No callsign'),
+    callsign: stringify(flight.callsign, 'Unavailable'),
+    airlineCode: stringify(flight.airlineCode),
+    airline: stringify(flight.airline, 'Unknown operator'),
+    operatorUnknown: flight.operatorUnknown ?? (!flight.airlineCode || flight.airlineCode === '---'),
+    operatorSource: flight.operatorSource || 'Not available',
     country: stringify(flight.country || flight.originCountry),
+    icao24: stringify(flight.icao24),
 
     // Routes & Departure/Arrival
     departure: flight.departure || '---',
     arrival: flight.arrival || '---',
-    departureCode: stringify(depCode),
-    arrivalCode: stringify(arrCode),
+    departureCode: stringify(depCode || null),
+    arrivalCode: stringify(arrCode || null),
 
     // Aircraft Registration/Type (guaranteed string)
-    aircraft: stringify(flight.aircraft || flight.aircraftRegistration),
+    aircraft: stringify(flight.aircraft?.type || flight.aircraftType || aircraftMetadata?.model || (typeof flight.aircraft === 'string' ? flight.aircraft : null)),
+    aircraftRegistration: stringify(flight.aircraftRegistration || flight.aircraft?.registration || aircraftMetadata?.registration),
+    aircraftManufacturer: stringify(flight.aircraftManufacturer || aircraftMetadata?.manufacturer),
+    aircraftIcaoType: stringify(flight.aircraftIcaoType || aircraftMetadata?.icaoType),
+    aircraftMetadataSource: stringify(flight.aircraftMetadataSource || aircraftMetadata?.source),
+    aircraftMetadataCheckedAt: flight.aircraftMetadataCheckedAt || aircraftMetadata?.checkedAt || null,
+    aircraftMetadataImportedAt: flight.aircraftMetadataImportedAt || null,
+    aircraftMetadataVersion: flight.aircraftMetadataVersion || null,
+    aircraftMetadataErrorCode: flight.aircraftMetadataErrorCode || null,
 
     // Status
     status: stringify(flight.status, 'UNKNOWN'),
 
     // Position & Coordinates
-    position: (lat != null && lng != null) ? { latitude: lat, longitude: lng } : null,
+    position: hasPosition ? { latitude: lat, longitude: lng } : null,
 
-    // Telemetry
-    altitude: flight.altitude != null ? Number(flight.altitude) : (flight.currentAltitude != null ? Number(flight.currentAltitude) : null),
-    speed: flight.speed != null ? Number(flight.speed) : (flight.velocity != null ? Number(flight.velocity) : null),
-    heading: flight.heading != null ? Number(flight.heading) : (flight.track != null ? Number(flight.track) : null),
-    verticalRate: flight.verticalRate != null ? Number(flight.verticalRate) : null,
+    altitudeFt: altitudeFt != null ? Number(altitudeFt) : null,
+    speedKnots: speedKnots != null ? Number(speedKnots) : null,
+    heading: heading != null ? Number(heading) : null,
+    verticalRateFpm: flight.verticalRateFpm != null ? Number(flight.verticalRateFpm) : null,
 
     // Metadata
     source: stringify(flight.source),
@@ -86,13 +103,12 @@ export function normalizeFlight(flight) {
 
     // Legacy backwards compatibility variables for map modules:
     flightCode: stringify(flight.flightCode || flight.flightNumber),
-    currentPosition: (lat != null && lng != null) ? { latitude: lat, longitude: lng } : null,
-    currentAltitude: flight.altitude != null ? Number(flight.altitude) : (flight.currentAltitude != null ? Number(flight.currentAltitude) : null),
-    velocity: flight.speed != null ? Number(flight.speed) : (flight.velocity != null ? Number(flight.velocity) : null),
-    track: flight.heading != null ? Number(flight.heading) : (flight.track != null ? Number(flight.track) : null),
+    currentPosition: hasPosition ? { latitude: lat, longitude: lng } : null,
+    currentAltitude: altitudeFt != null ? Number(altitudeFt) : null,
+    velocity: speedKnots != null ? Number(speedKnots) : null,
+    track: heading != null ? Number(heading) : null,
     originCountry: stringify(flight.country || flight.originCountry),
-    airline: stringify(flight.airlineCode || flight.airline),
-    progress: Number(flight.progress) || 0,
+    progress: null,
   };
 
   return normalized;
